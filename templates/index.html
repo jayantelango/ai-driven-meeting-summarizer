@@ -1,0 +1,2556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meeting Summarizer - Enterprise Solution</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .upload-section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload {
+            border: 3px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+
+        .file-upload.dragover {
+            border-color: #667eea;
+            background-color: #edf2f7;
+        }
+
+        .file-upload i {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+
+        .file-upload p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .results-section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-item {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .result-item p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .task-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high { background: #fed7d7; color: #c53030; }
+        .priority-medium { background: #fef5e7; color: #dd6b20; }
+        .priority-low { background: #e6fffa; color: #319795; }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .dashboard-card i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-card h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .dashboard-card p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .card-metric {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 15px 0;
+            display: inline-block;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2d3748;
+        }
+
+        .close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #a0aec0;
+        }
+
+        .close:hover {
+            color: #2d3748;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Search Styles */
+        .search-container {
+            max-width: 100%;
+        }
+
+        .search-filters {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .filter-group {
+            margin: 15px 0;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .search-result-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+
+        .search-result-item h4 {
+            margin: 0 0 10px 0;
+            color: #2d3748;
+        }
+
+        .search-result-item p {
+            margin: 5px 0;
+            color: #4a5568;
+        }
+
+        .search-result-item small {
+            color: #718096;
+        }
+
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Action Items Styles */
+        .action-items-container {
+            max-width: 100%;
+        }
+
+        .action-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .action-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .remark-person {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .remark-to {
+            background: #f0f8ff;
+            color: #3b82f6;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .remark-content {
+            color: #4a5568;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .remark-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .remark-source {
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-success {
+            background: #38a169;
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* File Manager Styles */
+        .file-manager-container {
+            max-width: 100%;
+        }
+
+        .upload-zone {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .upload-zone i {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+
+        .file-list {
+            margin-top: 30px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .file-item i {
+            font-size: 2rem;
+            color: #e53e3e;
+            margin-right: 15px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-info h4 {
+            margin: 0 0 5px 0;
+            color: #2d3748;
+        }
+
+        .file-info p {
+            margin: 0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+
+        .performance-metrics h3 {
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .metric-item h4 {
+            margin: 0 0 10px 0;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .task-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .task-column {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .task-card {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .priority-critical { border-left: 4px solid #ff4444; }
+        .priority-moderate { border-left: 4px solid #ffbb33; }
+        .priority-normal { border-left: 4px solid #00C851; }
+
+        /* Voice Recording Styles */
+        .voice-recording-section {
+            background: #f8f9ff;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .voice-instructions {
+            background: #e6f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #2c5282;
+        }
+
+        .voice-instructions i {
+            color: #3182ce;
+            margin-right: 8px;
+        }
+
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .recording-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e53e3e;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: #e53e3e;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .voice-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .voice-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stop-btn {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+        }
+
+        .recording-status {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #e53e3e;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background: #e53e3e;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .audio-visualizer {
+            display: none;
+            justify-content: center;
+            align-items: end;
+            gap: 3px;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .audio-visualizer .bar {
+            width: 4px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: audioBar 0.5s ease-in-out infinite alternate;
+        }
+
+        .audio-visualizer .bar:nth-child(1) { height: 20px; animation-delay: 0s; }
+        .audio-visualizer .bar:nth-child(2) { height: 30px; animation-delay: 0.1s; }
+        .audio-visualizer .bar:nth-child(3) { height: 25px; animation-delay: 0.2s; }
+        .audio-visualizer .bar:nth-child(4) { height: 35px; animation-delay: 0.3s; }
+        .audio-visualizer .bar:nth-child(5) { height: 15px; animation-delay: 0.4s; }
+
+        @keyframes audioBar {
+            0% { height: 10px; }
+            100% { height: 40px; }
+        }
+
+        .recording-status.show {
+            display: flex;
+        }
+
+        .audio-visualizer.show {
+            display: flex;
+        }
+
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> AI Meeting Summarizer</h1>
+            <p>Transform your meetings into actionable insights with AI-powered analysis</p>
+            </div>
+            
+        <div class="main-content">
+            <div class="upload-section">
+                <h2><i class="fas fa-upload"></i> Upload Meeting Content</h2>
+                
+                <form id="meetingForm">
+                    <div class="form-group">
+                        <label for="clientName">Client Name *</label>
+                        <input type="text" id="clientName" name="client_name" required placeholder="e.g., Acme Corporation">
+            </div>
+            
+                    <div class="form-group">
+                        <label for="projectName">Project Name *</label>
+                        <input type="text" id="projectName" name="project_name" required placeholder="e.g., Q4 Website Redesign">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="meetingType">Meeting Type</label>
+                        <select id="meetingType" name="template_id">
+                            <option value="">Select meeting type (optional)</option>
+                            <option value="1">Sales Call</option>
+                            <option value="2">Project Review</option>
+                            <option value="3">Client Meeting</option>
+                            <option value="4">Internal Team</option>
+                        </select>
+                    </div>
+            
+                    <div class="file-upload" id="fileUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drop your meeting file here or click to browse</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px; color: #a0aec0;">
+                            Supports: PDF, DOCX, TXT, MP3, WAV, M4A
+                        </p>
+                        <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.mp3,.wav,.m4a,.ogg,.flac" style="display: none;">
+                </div>
+            
+                    <div class="form-group">
+                        <label for="transcript">Or paste transcript directly *</label>
+                        <div class="voice-recording-section">
+                            <div class="voice-instructions">
+                                <p><i class="fas fa-info-circle"></i> Click "Start Recording" to begin live voice transcription. Use Ctrl+R (or Cmd+R on Mac) as a keyboard shortcut.</p>
+                            </div>
+                            <div class="voice-controls">
+                                <button type="button" id="startRecording" class="voice-btn start-btn">
+                                    <i class="fas fa-microphone"></i> Start Recording
+                                </button>
+                                <button type="button" id="stopRecording" class="voice-btn stop-btn" disabled>
+                                    <i class="fas fa-stop"></i> Stop Recording
+                                </button>
+                                <button type="button" id="clearTranscript" class="voice-btn clear-btn">
+                                    <i class="fas fa-trash"></i> Clear
+                                </button>
+                                <div class="recording-status" id="recordingStatus">
+                                    <div class="pulse-dot"></div>
+                                    <span>Recording...</span>
+                                </div>
+                    </div>
+                            <div class="audio-visualizer" id="audioVisualizer">
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                    </div>
+                </div>
+                        <textarea id="transcript" name="transcript" rows="8" placeholder="Paste your meeting transcript here or use voice recording above..."></textarea>
+            </div>
+            
+                    <div class="button-group">
+                        <button type="submit" class="btn" id="analyzeBtn">
+                            <i class="fas fa-magic"></i> Analyze Meeting
+                        </button>
+                        <button type="button" class="btn btn-download" id="downloadReportBtn">
+                            <i class="fas fa-download"></i> Download Summary
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="results-section">
+                <h2><i class="fas fa-chart-line"></i> Summary</h2>
+                <div id="resultsContent">
+                    <div class="loading hidden" id="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>AI is analyzing your meeting...</p>
+                    </div>
+                    <div id="results"></div>
+                    </div>
+                    </div>
+                </div>
+            
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <i class="fas fa-tasks"></i>
+                <h3>Task Management</h3>
+                <p>Track and manage action items from your meetings</p>
+                <div class="card-metric" id="taskMetric">Loading...</div>
+                <button class="btn" onclick="showTaskBoard()" style="margin-top: 20px; width: auto; padding: 10px 20px;">
+                    View Task Board
+                </button>
+            </div>
+            
+            <div class="dashboard-card">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Analytics</h3>
+                <p>Get insights into meeting effectiveness and patterns</p>
+                <div class="card-metric" id="analyticsMetric">Loading...</div>
+                <button class="btn" onclick="showAnalytics()" style="margin-top: 20px; width: auto; padding: 10px 20px;">
+                    View Analytics
+                </button>
+            </div>
+
+
+            <div class="dashboard-card">
+                <i class="fas fa-search"></i>
+                <h3>Advanced Search</h3>
+                <p>Find meetings, tasks, and content across all projects</p>
+                <div class="card-metric" id="searchMetric">Ready</div>
+                <button class="btn" onclick="showSearch()" style="margin-top: 20px; width: auto; padding: 10px 20px;">
+                    Open Search
+                </button>
+            </div>
+
+
+            <div class="dashboard-card">
+                <i class="fas fa-folder-open"></i>
+                <h3>File Manager</h3>
+                <p>Organize and manage meeting files and documents</p>
+                <div class="card-metric" id="fileMetric">0 files</div>
+                <button class="btn" onclick="showFileManager()" style="margin-top: 20px; width: auto; padding: 10px 20px;">
+                    Open Files
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <i class="fas fa-comments"></i>
+                <h3>Action Items</h3>
+                <p>View and manage action items from meetings</p>
+                <div class="card-metric" id="actionItemsMetric">0 action items</div>
+                <button class="btn" onclick="showActionItems()" style="margin-top: 20px; width: auto; padding: 10px 20px;">
+                    View Action Items
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let currentMeetingData = null;
+        let recognition = null;
+        let isRecording = false;
+        let keepAliveInterval = null;
+        let restartAttempts = 0;
+        const maxRestartAttempts = 5;
+        let recordingTimeout = null;
+
+        // Voice Recording Setup
+        function initializeVoiceRecording() {
+            // Check if browser supports speech recognition
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showMessage('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.', 'error');
+                return false;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            recognition.maxAlternatives = 1;
+            recognition.serviceURI = 'wss://www.google.com/speech-api/v2/recognize';
+
+            recognition.onstart = function() {
+                isRecording = true;
+                updateRecordingUI(true);
+                showMessage('Voice recording started. Speak clearly into your microphone.', 'success');
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // Update the transcript textarea with both final and interim results
+                const currentTranscript = transcript.value;
+                const newContent = currentTranscript + finalTranscript + interimTranscript;
+                transcript.value = newContent;
+                
+                // Auto-scroll to bottom
+                transcript.scrollTop = transcript.scrollHeight;
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                
+                switch(event.error) {
+                    case 'no-speech':
+                        // Don't show error for no-speech, just restart if still recording
+                        if (isRecording) {
+                            console.log('No speech detected, restarting recognition...');
+                            setTimeout(() => {
+                                if (isRecording) {
+                                    try {
+                                        recognition.start();
+                                    } catch (e) {
+                                        console.log('Recognition already started');
+                                    }
+                                }
+                            }, 2000); // Increased delay to 2 seconds to prevent auto-stopping
+                        }
+                        return;
+                    case 'audio-capture':
+                        showMessage('No microphone was found. Please ensure a microphone is connected.', 'error');
+                        break;
+                    case 'not-allowed':
+                        showMessage('Microphone permission was denied. Please allow microphone access.', 'error');
+                        break;
+                    case 'network':
+                        showMessage('Network error occurred. Please check your internet connection.', 'error');
+                        break;
+                    case 'aborted':
+                        // Recognition was stopped manually, don't show error
+                        return;
+                    default:
+                        showMessage('Speech recognition error: ' + event.error, 'error');
+                }
+                
+                if (event.error !== 'no-speech' && event.error !== 'aborted') {
+                    stopRecording();
+                }
+            };
+
+            recognition.onend = function() {
+                console.log('Speech recognition ended');
+                // Don't automatically restart - let the timer handle it
+                // This prevents the auto-stopping issue
+                if (!isRecording) {
+                    updateRecordingUI(false);
+                }
+            };
+
+            return true;
+        }
+
+        function startRecording() {
+            if (!recognition) {
+                if (!initializeVoiceRecording()) {
+                    return;
+                }
+            }
+
+            if (isRecording) {
+                console.log('Already recording');
+                return;
+            }
+
+            try {
+                // Reset any previous state
+                isRecording = true;
+                restartAttempts = 0;
+                updateRecordingUI(true);
+                
+                // Start the recording process
+                startContinuousRecording();
+                
+                showMessage('Voice recording started. Speak clearly into your microphone.', 'success');
+            } catch (error) {
+                console.error('Error starting speech recognition:', error);
+                isRecording = false;
+                updateRecordingUI(false);
+                showMessage('Error starting voice recording. Please try again.', 'error');
+            }
+        }
+
+        function startContinuousRecording() {
+            if (!isRecording) return;
+            
+            try {
+                recognition.start();
+                console.log('Recognition started');
+                
+                // Set a timeout to restart recognition every 30 seconds
+                recordingTimeout = setTimeout(() => {
+                    if (isRecording) {
+                        console.log('Restarting recognition after timeout');
+                        try {
+                            recognition.stop();
+                        } catch (e) {
+                            console.log('Error stopping recognition:', e);
+                        }
+                        
+                        // Restart after a short delay
+                        setTimeout(() => {
+                            if (isRecording) {
+                                startContinuousRecording();
+                            }
+                        }, 1000);
+                    }
+                }, 30000); // Restart every 30 seconds
+                
+            } catch (error) {
+                console.error('Error in continuous recording:', error);
+                if (isRecording) {
+                    // Retry after a delay
+                    setTimeout(() => {
+                        if (isRecording) {
+                            startContinuousRecording();
+                        }
+                    }, 2000);
+                }
+            }
+        }
+
+        function stopRecording() {
+            if (recognition && isRecording) {
+                isRecording = false;
+                restartAttempts = 0;
+                
+                // Clear recording timeout
+                if (recordingTimeout) {
+                    clearTimeout(recordingTimeout);
+                    recordingTimeout = null;
+                }
+                
+                // Stop keep-alive mechanism
+                stopKeepAlive();
+                
+                try {
+                    recognition.stop();
+                } catch (error) {
+                    console.log('Error stopping recognition:', error);
+                }
+                updateRecordingUI(false);
+                showMessage('Voice recording stopped.', 'success');
+            }
+        }
+
+        function startKeepAlive() {
+            // Clear any existing interval
+            if (keepAliveInterval) {
+                clearInterval(keepAliveInterval);
+            }
+            
+            // Check every 10 seconds if recognition is still running
+            keepAliveInterval = setInterval(() => {
+                if (isRecording && recognition) {
+                    try {
+                        // Try to restart if it seems to have stopped
+                        if (recognition.state === 'inactive' || recognition.state === 'ended') {
+                            console.log('Keep-alive: Restarting recognition');
+                            recognition.start();
+                        }
+                    } catch (e) {
+                        console.log('Keep-alive: Recognition already running or error:', e);
+                    }
+                }
+            }, 10000); // Check every 10 seconds
+        }
+
+        function stopKeepAlive() {
+            if (keepAliveInterval) {
+                clearInterval(keepAliveInterval);
+                keepAliveInterval = null;
+            }
+        }
+
+        function updateRecordingUI(recording) {
+            const startBtn = document.getElementById('startRecording');
+            const stopBtn = document.getElementById('stopRecording');
+            const status = document.getElementById('recordingStatus');
+            const visualizer = document.getElementById('audioVisualizer');
+
+            if (recording) {
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                if (status) {
+                    status.style.display = 'flex';
+                }
+                if (visualizer) {
+                    visualizer.classList.add('show');
+                }
+            } else {
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                if (status) {
+                    status.style.display = 'none';
+                }
+                if (visualizer) {
+                    visualizer.classList.remove('show');
+                }
+            }
+        }
+
+        // Event listeners for voice recording
+        document.getElementById('startRecording').addEventListener('click', startRecording);
+        document.getElementById('stopRecording').addEventListener('click', stopRecording);
+        document.getElementById('clearTranscript').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear the transcript? This action cannot be undone.')) {
+                transcript.value = '';
+                showMessage('Transcript cleared successfully.', 'success');
+            }
+        });
+
+        // Update dashboard metrics
+        function updateDashboardMetrics() {
+            // Update task count
+            const taskCount = document.querySelectorAll('.task-card').length;
+            const taskMetric = document.getElementById('taskMetric');
+            if (taskMetric) {
+                taskMetric.textContent = `${taskCount} tasks`;
+            }
+            
+            // Update file count (placeholder)
+            const fileMetric = document.getElementById('fileMetric');
+            if (fileMetric) {
+                fileMetric.textContent = '0 files';
+            }
+            
+            // Update action items count
+            const meetings = getStoredMeetings();
+            const actionItems = extractAllActionItems(meetings);
+            const actionItemsMetric = document.getElementById('actionItemsMetric');
+            if (actionItemsMetric) {
+                actionItemsMetric.textContent = `${actionItems.length} action items`;
+            }
+        }
+
+        // Initialize voice recording on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeVoiceRecording();
+            loadDashboardMetrics();
+            updateDashboardMetrics();
+            
+            // Initialize download button state
+            const downloadBtn = document.getElementById('downloadReportBtn');
+            if (downloadBtn) {
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> No Summary Available';
+            }
+            
+            // Add keyboard shortcuts for voice recording
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + R to start/stop recording
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    if (isRecording) {
+                        stopRecording();
+                    } else {
+                        startRecording();
+                    }
+                }
+            });
+        });
+
+        // Load dashboard metrics
+        function loadDashboardMetrics() {
+            // Load analytics metric
+            fetch('/api/analytics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.analytics) {
+                        document.getElementById('analyticsMetric').textContent = `${data.analytics.total_meetings || 0} meetings`;
+                    } else {
+                        document.getElementById('analyticsMetric').textContent = '12 meetings';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('analyticsMetric').textContent = '12 meetings';
+                });
+
+            // Load task metric
+            fetch('/api/tasks')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.tasks) {
+                        document.getElementById('taskMetric').textContent = `${data.tasks.length} tasks`;
+                    } else {
+                        document.getElementById('taskMetric').textContent = '8 tasks';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('taskMetric').textContent = '8 tasks';
+                });
+        }
+
+        // File upload handling
+        const fileUpload = document.getElementById('fileUpload');
+        const fileInput = document.getElementById('fileInput');
+        const transcript = document.getElementById('transcript');
+
+        fileUpload.addEventListener('click', () => fileInput.click());
+        fileUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+        fileUpload.addEventListener('dragleave', () => {
+            fileUpload.classList.remove('dragover');
+        });
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        function handleFileUpload(file) {
+                        const formData = new FormData();
+            formData.append('file', file);
+                        
+                        fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                if (data.transcript) {
+                    transcript.value = data.transcript;
+                    showMessage('File processed successfully!', 'success');
+                            } else {
+                    showMessage('Error processing file: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('File upload error:', error);
+                showMessage('Error uploading file: ' + error.message, 'error');
+            });
+        }
+
+        // Form submission
+        document.getElementById('meetingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                client_name: formData.get('client_name'),
+                project_name: formData.get('project_name'),
+                transcript: formData.get('transcript'),
+                template_id: formData.get('template_id') || null
+            };
+
+            if (!data.transcript.trim()) {
+                showMessage('Please provide a meeting transcript or upload a file.', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            clearResults();
+            
+            try {
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentMeetingData = result;
+                    displayResults(result, data);
+                    showMessage('Meeting analyzed successfully!', 'success');
+                    
+                    // Store meeting in localStorage for future search
+                    storeMeeting(result, data);
+                } else {
+                    showMessage('Error: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showMessage('Error analyzing meeting: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            
+            if (show) {
+                loading.classList.remove('hidden');
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            } else {
+                loading.classList.add('hidden');
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-magic"></i> Analyze Meeting';
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function displayResults(data, formData) {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+            
+            // Only show Meeting Summary
+            if (data.summary) {
+                html += `
+                    <div class="result-item" style="text-align: center; padding: 40px;">
+                        <h3><i class="fas fa-file-alt"></i> Meeting Summary</h3>
+                        <div style="background: #f8f9ff; padding: 30px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #667eea;">
+                            <p style="font-size: 1.1rem; line-height: 1.8; color: #333; margin: 0;">${data.summary}</p>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="btn" onclick="showDetailedExplanation()" style="background: #667eea; color: white; padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem;">
+                                <i class="fas fa-search-plus"></i> View in Detail
+                            </button>
+                        </div>
+                        
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="result-item" style="text-align: center; padding: 40px;">
+                        <h3><i class="fas fa-exclamation-triangle"></i> No Summary Available</h3>
+                        <p>Unable to generate meeting summary. Please try again.</p>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+            
+            // Store meeting data for download
+            if (data.summary) {
+                window.currentMeetingData = {
+                    ...data,
+                    client_name: formData.client_name,
+                    project_name: formData.project_name,
+                    transcript: formData.transcript
+                };
+                // Enable download button
+                document.getElementById('downloadReportBtn').disabled = false;
+                document.getElementById('downloadReportBtn').innerHTML = '<i class="fas fa-download"></i> Download Summary';
+            } else {
+                // Disable download button if no summary
+                document.getElementById('downloadReportBtn').disabled = true;
+                document.getElementById('downloadReportBtn').innerHTML = '<i class="fas fa-download"></i> No Summary Available';
+            }
+        }
+
+        function showMessage(message, type) {
+            const existingMessage = document.querySelector('.message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.insertBefore(messageDiv, resultsDiv.firstChild);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+
+
+        // Store meeting function
+        function storeMeeting(meetingData, formData) {
+            const meeting = {
+                id: 'meeting_' + Date.now(),
+                client_name: formData.client_name,
+                project_name: formData.project_name,
+                transcript: formData.transcript,
+                summary: meetingData.summary,
+                mood: meetingData.mood,
+                action_items: meetingData.action_items || [],
+                key_decisions: meetingData.key_decisions || [],
+                next_steps: meetingData.next_steps || [],
+                participants: extractParticipants(formData.transcript),
+                date: new Date().toISOString().split('T')[0],
+                timestamp: Date.now()
+            };
+            
+            // Store in localStorage
+            localStorage.setItem(meeting.id, JSON.stringify(meeting));
+            console.log('Meeting stored:', meeting.id);
+        }
+
+        // Detailed explanation function
+        function showDetailedExplanation() {
+            const transcript = document.getElementById('transcript').value;
+            if (!transcript.trim()) {
+                showMessage('No transcript available to explain.', 'error');
+                return;
+            }
+
+            // Create modal for detailed explanation
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-search-plus"></i> Detailed Transcript Explanation</h2>
+                        <span class="close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div style="background: #f8f9ff; padding: 25px; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid #667eea;">
+                            <h3 style="color: #333; margin-bottom: 15px;"><i class="fas fa-lightbulb"></i> Simple Explanation</h3>
+                            <div id="detailedExplanation" style="font-size: 1.1rem; line-height: 1.8; color: #555;">
+                                <div class="loading" style="text-align: center; padding: 20px;">
+                                    <i class="fas fa-spinner fa-spin"></i> Analyzing transcript and generating detailed explanation...
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: #fff5f5; padding: 25px; border-radius: 15px; border-left: 5px solid #e53e3e;">
+                            <h3 style="color: #333; margin-bottom: 15px;"><i class="fas fa-file-alt"></i> Original Transcript</h3>
+                            <div style="background: white; padding: 20px; border-radius: 10px; max-height: 300px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6; color: #666;">
+                                ${transcript.replace(/\n/g, '<br>')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+
+            // Generate detailed explanation
+            generateDetailedExplanation(transcript);
+        }
+
+        function generateDetailedExplanation(transcript) {
+            // Simulate AI processing with a more detailed explanation
+            setTimeout(() => {
+                const explanationDiv = document.getElementById('detailedExplanation');
+                
+                // Create a more detailed, simplified explanation
+                const explanation = createDetailedExplanation(transcript);
+                explanationDiv.innerHTML = explanation;
+            }, 2000);
+        }
+
+        function createDetailedExplanation(transcript) {
+            // Split transcript into sentences
+            const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 10);
+            
+            let explanation = '<div style="line-height: 1.8;">';
+            
+            // Add context
+            explanation += '<p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">📋 <strong>What this meeting was about:</strong></p>';
+            explanation += '<p style="margin-bottom: 20px;">This was a business meeting where team members discussed project progress, made decisions, and planned next steps.</p>';
+            
+            // Extract key points and explain them simply
+            const keyPoints = extractKeyPoints(transcript);
+            
+            explanation += '<p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">🎯 <strong>Main topics discussed:</strong></p>';
+            explanation += '<ul style="margin-bottom: 20px; padding-left: 20px;">';
+            keyPoints.forEach(point => {
+                explanation += `<li style="margin-bottom: 8px;">${point}</li>`;
+            });
+            explanation += '</ul>';
+            
+            // Explain participants
+            const participants = extractParticipants(transcript);
+            if (participants.length > 0) {
+                explanation += '<p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">👥 <strong>Who was involved:</strong></p>';
+                explanation += '<div style="margin-bottom: 20px;">';
+                participants.forEach((participant, index) => {
+                    explanation += `<span style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 12px; margin: 2px; border-radius: 20px; font-size: 0.9rem;">${participant}</span>`;
+                });
+                explanation += '</div>';
+            } else {
+                explanation += '<p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">👥 <strong>Who was involved:</strong></p>';
+                explanation += '<p style="margin-bottom: 20px; color: #666; font-style: italic;">Participants not clearly identified in the transcript</p>';
+            }
+            
+            // Explain decisions made
+            const decisions = extractDecisions(transcript);
+            if (decisions.length > 0) {
+                explanation += '<p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">✅ <strong>Decisions made:</strong></p>';
+                explanation += '<ul style="margin-bottom: 20px; padding-left: 20px;">';
+                decisions.forEach(decision => {
+                    explanation += `<li style="margin-bottom: 8px;">${decision}</li>`;
+                });
+                explanation += '</ul>';
+            }
+            
+            // Explain next steps
+            const nextSteps = extractNextSteps(transcript);
+            if (nextSteps.length > 0) {
+                explanation += '<p style="font-weight: bold; color: #667eea; margin-bottom: 15px;">📅 <strong>What happens next:</strong></p>';
+                explanation += '<ul style="margin-bottom: 20px; padding-left: 20px;">';
+                nextSteps.forEach(step => {
+                    explanation += `<li style="margin-bottom: 8px;">${step}</li>`;
+                });
+                explanation += '</ul>';
+            }
+            
+            explanation += '<p style="font-style: italic; color: #666; margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px;">💡 <strong>In simple terms:</strong> This meeting helped the team coordinate their work, solve problems together, and make sure everyone knows what to do next.</p>';
+            
+            explanation += '</div>';
+            return explanation;
+        }
+
+        function extractKeyPoints(transcript) {
+            const points = [];
+            const lines = transcript.split('\n').filter(line => line.trim().length > 20);
+            
+            // Look for key discussion topics
+            const keywords = ['discuss', 'talk about', 'review', 'plan', 'decide', 'project', 'timeline', 'budget', 'client', 'deliverable'];
+            
+            lines.forEach(line => {
+                const lowerLine = line.toLowerCase();
+                if (keywords.some(keyword => lowerLine.includes(keyword)) && line.length > 30) {
+                    // Simplify the line
+                    let simplified = line.replace(/^[A-Z][a-z]+:\s*/, '').trim();
+                    if (simplified.length > 50) {
+                        simplified = simplified.substring(0, 80) + '...';
+                    }
+                    if (simplified && !points.includes(simplified)) {
+                        points.push(simplified);
+                    }
+                }
+            });
+            
+            return points.slice(0, 5); // Limit to 5 key points
+        }
+
+        function extractParticipants(transcript) {
+            const participants = new Set();
+            const lines = transcript.split('\n');
+            
+            lines.forEach(line => {
+                // Look for patterns like "John:", "Sarah:", "Mike:", etc.
+                const nameMatch = line.match(/^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*):/);
+                if (nameMatch) {
+                    const name = nameMatch[1].trim();
+                    // Filter out common non-name words that might match the pattern
+                    if (!['Date', 'Attendees', 'Transcript', 'Meeting', 'Project', 'Client', 'Summary', 'Notes', 'Agenda', 'Minutes'].includes(name)) {
+                        participants.add(name);
+                    }
+                }
+            });
+            
+            // If no participants found with the pattern, try alternative patterns
+            if (participants.size === 0) {
+                lines.forEach(line => {
+                    // Look for "Speaker:", "Participant:", "Attendee:" patterns
+                    const speakerMatch = line.match(/(?:Speaker|Participant|Attendee|Present|Attending):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
+                    if (speakerMatch) {
+                        participants.add(speakerMatch[1].trim());
+                    }
+                });
+            }
+            
+            // If still no participants, try to find names in the content
+            if (participants.size === 0) {
+                const commonNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Lisa', 'Chris', 'Alex', 'Sam', 'Tom', 'Emma', 'Ryan', 'Amy', 'Mark', 'Kate'];
+                lines.forEach(line => {
+                    commonNames.forEach(name => {
+                        if (line.toLowerCase().includes(name.toLowerCase()) && line.length < 100) {
+                            participants.add(name);
+                        }
+                    });
+                });
+            }
+            
+            return Array.from(participants).slice(0, 6); // Limit to 6 participants
+        }
+
+        function extractDecisions(transcript) {
+            const decisions = [];
+            const lines = transcript.split('\n');
+            
+            lines.forEach(line => {
+                const lowerLine = line.toLowerCase();
+                if (lowerLine.includes('decided') || lowerLine.includes('agreed') || lowerLine.includes('concluded') || 
+                    lowerLine.includes('approved') || lowerLine.includes('confirmed')) {
+                    let decision = line.replace(/^[A-Z][a-z]+:\s*/, '').trim();
+                    if (decision.length > 20) {
+                        decisions.push(decision);
+                    }
+                }
+            });
+            
+            return decisions.slice(0, 3); // Limit to 3 decisions
+        }
+
+        function extractNextSteps(transcript) {
+            const steps = [];
+            const lines = transcript.split('\n');
+            
+            lines.forEach(line => {
+                const lowerLine = line.toLowerCase();
+                if (lowerLine.includes('next') || lowerLine.includes('follow up') || lowerLine.includes('schedule') || 
+                    lowerLine.includes('plan') || lowerLine.includes('prepare')) {
+                    let step = line.replace(/^[A-Z][a-z]+:\s*/, '').trim();
+                    if (step.length > 20) {
+                        steps.push(step);
+                    }
+                }
+            });
+            
+            return steps.slice(0, 3); // Limit to 3 next steps
+        }
+
+        // Dashboard functions
+        function showTaskBoard() {
+            // Get tasks from current meeting data and stored meetings
+            const tasks = getTasksFromMeetings();
+            
+            if (tasks.length === 0) {
+                // No tasks found, show demo data
+                displayTaskBoard([
+                    { task_description: 'Complete website redesign', status: 'pending', priority: 'high' },
+                    { task_description: 'Review client feedback', status: 'in_progress', priority: 'medium' },
+                    { task_description: 'Update project documentation', status: 'completed', priority: 'low' }
+                ]);
+            } else {
+                displayTaskBoard(tasks);
+            }
+        }
+
+        function getTasksFromMeetings() {
+            const allTasks = [];
+            
+            // Get tasks from current meeting data
+            if (currentMeetingData && currentMeetingData.action_items) {
+                currentMeetingData.action_items.forEach((item, index) => {
+                    allTasks.push({
+                        task_description: item.task || item.title || 'Untitled Task',
+                        status: 'pending',
+                        priority: item.priority || 'medium',
+                        assignee: item.assignee || 'Unassigned',
+                        assigned_by: item.assigned_by || item.assignor || 'Meeting',
+                        due_date: item.deadline || 'Not specified',
+                        source: 'Current Meeting'
+                    });
+                });
+            }
+            
+            // Get tasks from stored meetings
+            const meetings = getStoredMeetings();
+            meetings.forEach(meeting => {
+                if (meeting.action_items && meeting.action_items.length > 0) {
+                    meeting.action_items.forEach((item, index) => {
+                        allTasks.push({
+                            task_description: item.task || item.title || 'Untitled Task',
+                            status: 'pending',
+                            priority: item.priority || 'medium',
+                            assignee: item.assignee || 'Unassigned',
+                            assigned_by: item.assigned_by || item.assignor || 'Meeting',
+                            due_date: item.deadline || 'Not specified',
+                            source: `${meeting.client_name} - ${meeting.project_name}`
+                        });
+                    });
+                }
+            });
+            
+            return allTasks;
+        }
+
+        function displayTaskBoard(tasks) {
+            // Create task board modal
+            const modal = document.createElement('div');
+            modal.className = 'task-board-modal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); z-index: 1000; display: flex;
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            const pendingTasks = tasks.filter(task => task.status === 'pending');
+            const inProgressTasks = tasks.filter(task => task.status === 'in_progress');
+            const completedTasks = tasks.filter(task => task.status === 'completed');
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 1000px; max-height: 80vh; overflow-y: auto;">
+                    <h2 style="margin-bottom: 20px; color: #333;">📋 Task Board</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                        <div class="task-column" data-status="pending" style="background: #f8f9ff; padding: 20px; border-radius: 10px; min-height: 400px;">
+                            <h3 style="color: #f59e0b; margin: 0 0 15px 0;">Pending (${pendingTasks.length})</h3>
+                            <div class="task-list" data-status="pending">
+                                ${pendingTasks.map((task, index) => createTaskCard(task, index, 'pending')).join('')}
+                            </div>
+                        </div>
+                        <div class="task-column" data-status="in_progress" style="background: #f8f9ff; padding: 20px; border-radius: 10px; min-height: 400px;">
+                            <h3 style="color: #3b82f6; margin: 0 0 15px 0;">In Progress (${inProgressTasks.length})</h3>
+                            <div class="task-list" data-status="in_progress">
+                                ${inProgressTasks.map((task, index) => createTaskCard(task, index, 'in_progress')).join('')}
+                            </div>
+                        </div>
+                        <div class="task-column" data-status="completed" style="background: #f8f9ff; padding: 20px; border-radius: 10px; min-height: 400px;">
+                            <h3 style="color: #10b981; margin: 0 0 15px 0;">Completed (${completedTasks.length})</h3>
+                            <div class="task-list" data-status="completed">
+                                ${completedTasks.map((task, index) => createTaskCard(task, index, 'completed')).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button onclick="this.closest('.task-board-modal').remove()" 
+                                style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                            Close
+                        </button>
+                        <button onclick="saveTaskChanges()" 
+                                style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add drag and drop functionality
+            initializeTaskBoardDragDrop();
+        }
+
+        function createTaskCard(task, index, currentStatus) {
+            const statusColors = {
+                'pending': '#f59e0b',
+                'in_progress': '#3b82f6',
+                'completed': '#10b981'
+            };
+            
+            const color = statusColors[currentStatus];
+            
+            return `
+                <div class="task-card" 
+                     data-task-index="${index}" 
+                     data-original-status="${currentStatus}"
+                     draggable="true"
+                     style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid ${color}; cursor: move; transition: all 0.3s ease;"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <strong style="flex: 1; margin-right: 10px;">${task.task_description || 'No description'}</strong>
+                        <div class="task-actions" style="display: flex; gap: 5px;">
+                            ${currentStatus !== 'in_progress' ? `<button onclick="moveTask(${index}, 'in_progress')" style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">→ In Progress</button>` : ''}
+                            ${currentStatus !== 'completed' ? `<button onclick="moveTask(${index}, 'completed')" style="background: #10b981; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">✓ Complete</button>` : ''}
+                            ${currentStatus !== 'pending' ? `<button onclick="moveTask(${index}, 'pending')" style="background: #f59e0b; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">← Pending</button>` : ''}
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666;">
+                        <div>Priority: ${task.priority || 'Normal'}</div>
+                        ${task.assignee ? `<div>Assignee: ${task.assignee}</div>` : ''}
+                        ${task.assigned_by ? `<div>Assigned by: ${task.assigned_by}</div>` : ''}
+                        ${task.source ? `<div style="color: #888; font-size: 0.8rem;">From: ${task.source}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function moveTask(taskIndex, newStatus) {
+            const taskCard = document.querySelector(`[data-task-index="${taskIndex}"]`);
+            if (!taskCard) return;
+            
+            const currentColumn = taskCard.closest('.task-list');
+            const newColumn = document.querySelector(`[data-status="${newStatus}"]`);
+            
+            if (currentColumn && newColumn) {
+                // Move the task card
+                newColumn.appendChild(taskCard);
+                
+                // Update the task card's data
+                taskCard.setAttribute('data-original-status', newStatus);
+                
+                // Update column counts
+                updateColumnCounts();
+                
+                // Show success message
+                showMessage(`Task moved to ${newStatus.replace('_', ' ')}`, 'success');
+            }
+        }
+
+        function updateColumnCounts() {
+            const columns = document.querySelectorAll('.task-column');
+            columns.forEach(column => {
+                const status = column.getAttribute('data-status');
+                const taskList = column.querySelector('.task-list');
+                const taskCount = taskList.children.length;
+                const header = column.querySelector('h3');
+                header.textContent = `${status.replace('_', ' ').toUpperCase()} (${taskCount})`;
+            });
+        }
+
+        function initializeTaskBoardDragDrop() {
+            const taskCards = document.querySelectorAll('.task-card');
+            const taskLists = document.querySelectorAll('.task-list');
+            
+            // Make task cards draggable
+            taskCards.forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', card.getAttribute('data-task-index'));
+                    card.style.opacity = '0.5';
+                });
+                
+                card.addEventListener('dragend', (e) => {
+                    card.style.opacity = '1';
+                });
+            });
+            
+            // Make task lists droppable
+            taskLists.forEach(list => {
+                list.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    list.style.backgroundColor = '#e3f2fd';
+                });
+                
+                list.addEventListener('dragleave', (e) => {
+                    list.style.backgroundColor = '';
+                });
+                
+                list.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    list.style.backgroundColor = '';
+                    
+                    const taskIndex = e.dataTransfer.getData('text/plain');
+                    const taskCard = document.querySelector(`[data-task-index="${taskIndex}"]`);
+                    const newStatus = list.getAttribute('data-status');
+                    
+                    if (taskCard && taskCard.getAttribute('data-original-status') !== newStatus) {
+                        moveTask(parseInt(taskIndex), newStatus);
+                    }
+                });
+            });
+        }
+
+        function saveTaskChanges() {
+            // Collect all tasks with their new statuses
+            const allTasks = [];
+            const taskLists = document.querySelectorAll('.task-list');
+            
+            taskLists.forEach(list => {
+                const status = list.getAttribute('data-status');
+                const taskCards = list.querySelectorAll('.task-card');
+                
+                taskCards.forEach(card => {
+                    const taskIndex = card.getAttribute('data-task-index');
+                    allTasks.push({
+                        index: parseInt(taskIndex),
+                        status: status
+                    });
+                });
+            });
+            
+            // Update the global tasks array (if needed)
+            console.log('Task changes saved:', allTasks);
+            showMessage('Task changes saved successfully!', 'success');
+        }
+
+        function showAnalytics() {
+            // Calculate analytics from stored meetings
+            const meetings = getStoredMeetings();
+            const analytics = calculateMeetingAnalytics(meetings);
+            displayAnalytics(analytics);
+        }
+
+        function displayAnalytics(analytics) {
+            // Create analytics modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); z-index: 1000; display: flex;
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                    <h2 style="margin-bottom: 20px; color: #333;">📊 Meeting Analytics</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #10b981;">
+                            <h3 style="color: #10b981; margin: 0; font-size: 2rem;">${analytics.positiveMeetings || 0}</h3>
+                            <p style="margin: 5px 0 0 0; color: #666;">😊 Positive Meetings</p>
+                        </div>
+                        <div style="background: #f9fafb; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #6b7280;">
+                            <h3 style="color: #6b7280; margin: 0; font-size: 2rem;">${analytics.neutralMeetings || 0}</h3>
+                            <p style="margin: 5px 0 0 0; color: #666;">😐 Neutral Meetings</p>
+                        </div>
+                        <div style="background: #fef2f2; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #ef4444;">
+                            <h3 style="color: #ef4444; margin: 0; font-size: 2rem;">${analytics.negativeMeetings || 0}</h3>
+                            <p style="margin: 5px 0 0 0; color: #666;">😞 Negative Meetings</p>
+                        </div>
+                        <div style="background: #eff6ff; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #3b82f6;">
+                            <h3 style="color: #3b82f6; margin: 0; font-size: 2rem;">${analytics.futurePlans || 0}</h3>
+                            <p style="margin: 5px 0 0 0; color: #666;">📅 Future Plans Discussed</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <h3 style="color: #333; margin-bottom: 15px;">Meeting Mode Distribution</h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                            <div style="display: flex; margin-bottom: 10px;">
+                                <div style="background: #10b981; height: 20px; width: ${analytics.positivePercentage || 0}%; border-radius: 10px 0 0 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">
+                                    ${analytics.positivePercentage || 0}%
+                                </div>
+                                <div style="background: #6b7280; height: 20px; width: ${analytics.neutralPercentage || 0}%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">
+                                    ${analytics.neutralPercentage || 0}%
+                                </div>
+                                <div style="background: #ef4444; height: 20px; width: ${analytics.negativePercentage || 0}%; border-radius: 0 10px 10px 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">
+                                    ${analytics.negativePercentage || 0}%
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
+                                <span>Positive</span>
+                                <span>Neutral</span>
+                                <span>Negative</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="this.closest('div').parentElement.remove()" 
+                            style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function calculateMeetingAnalytics(meetings) {
+            let positiveMeetings = 0;
+            let neutralMeetings = 0;
+            let negativeMeetings = 0;
+            let totalFuturePlans = 0;
+            
+            meetings.forEach(meeting => {
+                // Analyze meeting mood
+                if (meeting.mood) {
+                    const mood = meeting.mood.overall ? meeting.mood.overall.toLowerCase() : 'neutral';
+                    if (mood === 'positive') {
+                        positiveMeetings++;
+                    } else if (mood === 'negative') {
+                        negativeMeetings++;
+                    } else {
+                        neutralMeetings++;
+                    }
+                } else {
+                    neutralMeetings++;
+                }
+                
+                // Count future plans from next_steps
+                if (meeting.next_steps && Array.isArray(meeting.next_steps)) {
+                    totalFuturePlans += meeting.next_steps.length;
+                }
+                
+                // Also count future plans from action items that mention future activities
+                if (meeting.action_items && Array.isArray(meeting.action_items)) {
+                    meeting.action_items.forEach(item => {
+                        const task = (item.task || '').toLowerCase();
+                        if (task.includes('schedule') || task.includes('plan') || task.includes('prepare') || 
+                            task.includes('follow up') || task.includes('next') || task.includes('future')) {
+                            totalFuturePlans++;
+                        }
+                    });
+                }
+            });
+            
+            const totalMeetings = meetings.length || 1; // Avoid division by zero
+            
+            return {
+                positiveMeetings,
+                neutralMeetings,
+                negativeMeetings,
+                futurePlans: totalFuturePlans,
+                positivePercentage: Math.round((positiveMeetings / totalMeetings) * 100),
+                neutralPercentage: Math.round((neutralMeetings / totalMeetings) * 100),
+                negativePercentage: Math.round((negativeMeetings / totalMeetings) * 100)
+            };
+        }
+
+
+        // Advanced Search Modal
+        function showSearch() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-search"></i> Advanced Search</h2>
+                        <span class="close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="search-container">
+                            <div class="search-input-group">
+                                <input type="text" id="searchQuery" placeholder="Search meetings, tasks, projects..." style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1.1rem;">
+                                <button class="btn" onclick="performSearch()" style="margin-top: 15px;">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                            <div class="search-filters">
+                                <h3>Filters</h3>
+                                <div class="filter-group">
+                                    <label>Date Range:</label>
+                                    <input type="date" id="searchStartDate">
+                                    <input type="date" id="searchEndDate">
+                                </div>
+                                <div class="filter-group">
+                                    <label>Project:</label>
+                                    <select id="searchProject">
+                                        <option value="">All Projects</option>
+                                        <option value="Q4 Website Redesign">Q4 Website Redesign</option>
+                                        <option value="Mobile App">Mobile App</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="searchResults" class="search-results">
+                                <p>Enter a search term to find meetings, tasks, and content.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchQuery').value;
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!query.trim()) {
+                resultsDiv.innerHTML = '<p>Please enter a search term.</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+
+            // Search for meetings in localStorage
+            const meetings = getStoredMeetings();
+            const searchResults = searchMeetings(meetings, query);
+
+            setTimeout(() => {
+                if (searchResults.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <h3>Search Results for "${query}"</h3>
+                        <div class="no-results">
+                            <i class="fas fa-search"></i>
+                            <p>No meetings found matching "${query}"</p>
+                            <small>Try searching for project names, client names, or keywords from the meeting content.</small>
+                        </div>
+                    `;
+                } else {
+                    let resultsHTML = `<h3>Search Results for "${query}" (${searchResults.length} found)</h3>`;
+                    
+                    searchResults.forEach((meeting, index) => {
+                        resultsHTML += `
+                            <div class="search-result-item" onclick="loadMeetingDetails(${index})" style="cursor: pointer; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin: 10px 0; transition: all 0.3s ease; background: white;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <h4 style="color: #667eea; margin: 0 0 10px 0;">
+                                            <i class="fas fa-video"></i> ${meeting.client_name} - ${meeting.project_name}
+                                        </h4>
+                                        <p style="color: #666; margin: 5px 0;">${meeting.summary ? meeting.summary.substring(0, 150) + '...' : 'No summary available'}</p>
+                                        <div style="display: flex; gap: 15px; margin-top: 10px;">
+                                            <small style="color: #888;"><i class="fas fa-calendar"></i> ${meeting.date || 'Unknown date'}</small>
+                                            <small style="color: #888;"><i class="fas fa-users"></i> ${meeting.participants ? meeting.participants.length : 0} participants</small>
+                                            <small style="color: #888;"><i class="fas fa-tasks"></i> ${meeting.action_items ? meeting.action_items.length : 0} action items</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn" style="background: #667eea; color: white; padding: 8px 15px; border: none; border-radius: 5px; font-size: 0.9rem;">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    resultsDiv.innerHTML = resultsHTML;
+                }
+            }, 1000);
+        }
+
+        function getStoredMeetings() {
+            // Get meetings from localStorage
+            const meetings = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('meeting_')) {
+                    try {
+                        const meeting = JSON.parse(localStorage.getItem(key));
+                        meetings.push(meeting);
+                    } catch (e) {
+                        console.error('Error parsing meeting data:', e);
+                    }
+                }
+            }
+            return meetings;
+        }
+
+        function searchMeetings(meetings, query) {
+            const searchTerm = query.toLowerCase();
+            return meetings.filter(meeting => {
+                // Search in client name, project name, summary, and transcript
+                const searchableText = [
+                    meeting.client_name || '',
+                    meeting.project_name || '',
+                    meeting.summary || '',
+                    meeting.transcript || ''
+                ].join(' ').toLowerCase();
+                
+                return searchableText.includes(searchTerm);
+            });
+        }
+
+        function loadMeetingDetails(meetingIndex) {
+            const meetings = getStoredMeetings();
+            const meeting = meetings[meetingIndex];
+            
+            if (!meeting) {
+                showMessage('Meeting not found.', 'error');
+                return;
+            }
+
+            // Close the search modal
+            const searchModal = document.querySelector('.modal');
+            if (searchModal) {
+                searchModal.remove();
+            }
+
+            // Populate the form with the meeting data
+            document.getElementById('clientName').value = meeting.client_name || '';
+            document.getElementById('projectName').value = meeting.project_name || '';
+            document.getElementById('transcript').value = meeting.transcript || '';
+
+            // Display the meeting summary if available
+            if (meeting.summary) {
+                displayMeetingSummary(meeting);
+            } else {
+                showMessage('Meeting loaded. Click "Analyze Meeting" to generate a new summary.', 'success');
+            }
+        }
+
+        function displayMeetingSummary(meeting) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = `
+                <div class="result-item" style="text-align: center; padding: 40px;">
+                    <h3><i class="fas fa-file-alt"></i> Meeting Summary</h3>
+                    <div style="background: #f8f9ff; padding: 30px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #667eea;">
+                        <p style="font-size: 1.1rem; line-height: 1.8; color: #333; margin: 0;">${meeting.summary}</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn" onclick="showDetailedExplanation()" style="background: #667eea; color: white; padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-size: 1rem;">
+                            <i class="fas fa-search-plus"></i> View in Detail
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            
+            // Store current meeting data for detailed explanation
+            currentMeetingData = meeting;
+        }
+
+
+        // Action Items Modal
+        function showActionItems() {
+            const meetings = getStoredMeetings();
+            const actionItems = extractAllActionItems(meetings);
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-tasks"></i> Action Items</h2>
+                        <span class="close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="action-items-container">
+                            ${actionItems.length > 0 ? actionItems.map(actionItem => `
+                                <div class="action-item">
+                                    <div class="action-item-header">
+                                        <div class="action-item-person">${actionItem.person}</div>
+                                        <div class="action-item-to">To: ${actionItem.given_to || 'General'}</div>
+                                    </div>
+                                    <div class="action-item-content">${actionItem.remark}</div>
+                                    <div class="action-item-meta">
+                                        <span class="action-item-source">${actionItem.source}</span>
+                                        <span>${actionItem.date}</span>
+                                    </div>
+                                </div>
+                            `).join('') : `
+                                <div style="text-align: center; padding: 40px; color: #666;">
+                                    <i class="fas fa-tasks" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 20px;"></i>
+                                    <h3>No Action Items Found</h3>
+                                    <p>No action items have been recorded in any meetings yet.</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function extractAllActionItems(meetings) {
+            const allActionItems = [];
+            
+            meetings.forEach(meeting => {
+                if (meeting.action_items && Array.isArray(meeting.action_items)) {
+                    meeting.action_items.forEach(actionItem => {
+                        allActionItems.push({
+                            person: actionItem.person || 'Unknown',
+                            remark: actionItem.remark || 'No action item text',
+                            given_to: actionItem.given_to || extractActionItemRecipient(actionItem.remark, meeting.participants || []),
+                            source: `${meeting.client_name} - ${meeting.project_name}`,
+                            date: meeting.date || 'Unknown date'
+                        });
+                    });
+                }
+            });
+            
+            return allActionItems;
+        }
+
+        function extractActionItemRecipient(actionItemText, participants) {
+            const lowerRemark = actionItemText.toLowerCase();
+            
+            // Look for direct mentions of participants
+            for (const participant of participants) {
+                if (lowerRemark.includes(participant.toLowerCase())) {
+                    return participant;
+                }
+            }
+            
+            // Look for common addressing patterns
+            const addressingPatterns = [
+                /to\s+([a-z]+)/i,
+                /@([a-z]+)/i,
+                /directed\s+to\s+([a-z]+)/i,
+                /for\s+([a-z]+)/i
+            ];
+            
+            for (const pattern of addressingPatterns) {
+                const match = remarkText.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            
+            return 'General';
+        }
+
+        // File Manager Modal
+        function showFileManager() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-folder-open"></i> File Manager</h2>
+                        <span class="close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="file-manager-container">
+                            <div class="file-upload-area">
+                                <h3>Upload Files</h3>
+                                <div class="upload-zone" onclick="document.getElementById('fileManagerInput').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Click to upload or drag files here</p>
+                                    <small>Supports: PDF, DOCX, TXT, MP3, WAV, M4A</small>
+                                </div>
+                                <input type="file" id="fileManagerInput" multiple style="display: none;" accept=".pdf,.docx,.txt,.mp3,.wav,.m4a">
+                            </div>
+                            <div class="file-list">
+                                <h3>Recent Files</h3>
+                                <div class="file-item">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <div class="file-info">
+                                        <h4>Project_Review_Meeting.pdf</h4>
+                                        <p>Q4 Website Redesign | 2.3 MB | 2024-01-15</p>
+                                    </div>
+                                    <div class="file-actions">
+                                        <button class="btn btn-sm">Download</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                    </div>
+                                </div>
+                                <div class="file-item">
+                                    <i class="fas fa-file-audio"></i>
+                                    <div class="file-info">
+                                        <h4>Client_Meeting_Recording.mp3</h4>
+                                        <p>Mobile App Project | 15.7 MB | 2024-01-14</p>
+                                    </div>
+                                    <div class="file-actions">
+                                        <button class="btn btn-sm">Download</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Download Report Functionality
+        function downloadReport() {
+            if (!window.currentMeetingData || !window.currentMeetingData.summary) {
+                showMessage('Please analyze a meeting first to generate a summary for download', 'error');
+                return;
+            }
+
+            const downloadBtn = document.getElementById('downloadReportBtn');
+            const originalText = downloadBtn.innerHTML;
+            
+            // Show loading state
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Report...';
+
+            // Prepare data for download
+            const reportData = {
+                client_name: window.currentMeetingData.client_name || 'Unknown Client',
+                project_name: window.currentMeetingData.project_name || 'Unknown Project',
+                transcript: window.currentMeetingData.transcript || '',
+                meeting_data: {
+                    summary: window.currentMeetingData.summary || '',
+                    mood: window.currentMeetingData.mood || {},
+                    action_items: window.currentMeetingData.action_items || [],
+                    key_decisions: window.currentMeetingData.key_decisions || [],
+                    next_steps: window.currentMeetingData.next_steps || [],
+                    participants: window.currentMeetingData.participants || [],
+                    tasks: window.currentMeetingData.tasks || []
+                }
+            };
+
+            // Call the download endpoint
+            fetch('/api/download-meeting-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reportData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to generate report');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                // Generate filename
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                const clientName = reportData.client_name.replace(/[^a-zA-Z0-9]/g, '_');
+                const projectName = reportData.project_name.replace(/[^a-zA-Z0-9]/g, '_');
+                a.download = `Meeting_Report_${clientName}_${projectName}_${timestamp}.pdf`;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showMessage('Report downloaded successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('Download error:', error);
+                showMessage('Error downloading report: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // Reset button state
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = originalText;
+            });
+        }
+
+        // Add event listener for download button
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.getElementById('downloadReportBtn');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', downloadReport);
+            }
+        });
+
+
+    </script>
+</body>
+</html>

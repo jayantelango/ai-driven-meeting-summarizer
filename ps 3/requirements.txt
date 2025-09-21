@@ -1,0 +1,32 @@
+flask>=2.3.0
+python-dotenv>=1.0.0
+google-generativeai>=0.3.0
+Flask-SQLAlchemy>=3.0.0
+Flask-Mail>=0.9.1
+FPDF2>=2.7.0
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+openpyxl>=3.1.0
+Werkzeug>=2.3.0
+SpeechRecognition>=3.10.0
+pydub>=0.25.1
+reportlab>=4.0.0
+
+# Security and Authentication
+PyJWT>=2.8.0
+bcrypt>=4.0.1
+marshmallow>=3.20.0
+flask-cors>=4.0.0
+flask-limiter>=3.5.0
+flask-socketio>=5.5.0
+
+# Testing
+pytest>=7.4.0
+pytest-flask>=1.3.0
+pytest-cov>=4.1.0
+factory-boy>=3.3.0
+
+# Production
+gunicorn>=21.2.0
+redis>=5.0.0
+psycopg2-binary>=2.9.0

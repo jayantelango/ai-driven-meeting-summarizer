@@ -1,0 +1,10 @@
+flask
+python-dotenv
+google-generativeai
+Flask-SQLAlchemy
+Flask-Mail
+FPDF2
+openpyxl
+python-docx
+PyPDF2
+reportlab

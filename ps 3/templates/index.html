@@ -1,0 +1,3288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meeting Summarizer - Enterprise Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+
+        /* Navigation */
+        .nav-tabs {
+            background: white;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            padding: 0 2rem;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .nav-tab:hover {
+            background: #f8f9fa;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .dashboard-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Meeting Analysis Section */
+        .meeting-form {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Task Board */
+        .task-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .task-column {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .task-column h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .task-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .task-priority {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-card h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .task-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+                padding: 0 1rem;
+            }
+        }
+
+        /* File Upload Area */
+        .file-upload-area {
+            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .uploaded-file {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .remove-file {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .remove-file:hover {
+            background: #c82333;
+        }
+
+        .file-status {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        /* Analytics Charts Placeholder */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Message styles */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Enhanced Analysis Results Styles */
+        .mood-display {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mood-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .mood-positive {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .mood-negative {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .mood-neutral {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .remark-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .action-item, .task-assignment {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .action-item:hover, .task-assignment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .action-header, .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .assignee {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .action-task, .task-description {
+            font-weight: 500;
+            margin: 0.5rem 0;
+        }
+
+        .action-deadline, .task-deadline, .assigned-by {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Dictionary Styles */
+        .dictionary-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .dictionary-search {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dictionary-search .search-input {
+            flex: 1;
+            padding: 12px 16px 12px 40px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .dictionary-search .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .dictionary-instructions {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .dictionary-instructions ul {
+            margin: 0.5rem 0 0 1.5rem;
+            color: #666;
+        }
+
+        .dictionary-instructions li {
+            margin: 0.25rem 0;
+        }
+
+        .dictionary-results {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .dictionary-placeholder {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #666;
+        }
+
+        .dictionary-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .dictionary-entry {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .word-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .word-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        .word-pronunciation {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .word-type {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .definition-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .definition-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .definition-text {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .examples-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .example-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .example-text {
+            font-style: italic;
+            color: #555;
+        }
+
+        .example-translation {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .synonyms, .antonyms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .synonym-tag, .antonym-tag {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid #c3e6cb;
+        }
+
+        .antonym-tag {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .word-origin {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .dictionary-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #667eea;
+        }
+
+        .dictionary-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+        }
+
+        /* Right-click context menu */
+        .context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 0.5rem 0;
+            z-index: 1000;
+            min-width: 150px;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .context-menu-item:hover {
+            background: #f8f9fa;
+        }
+
+        .context-menu-item:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .context-menu-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Text selection highlighting */
+        .selected-text {
+            background: #fff3cd;
+            padding: 0.1rem 0.2rem;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .transcript-text {
+            user-select: text;
+            cursor: text;
+        }
+
+        .transcript-container {
+            position: relative;
+        }
+
+        .transcript-container::after {
+            content: "💡 Tip: Right-click on any word to look it up in the dictionary";
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            font-size: 0.8rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Analysis Status Styles */
+        .analysis-status {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: #f8fafc;
+        }
+
+        .analysis-status.loading {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .analysis-status.success {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .analysis-status.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .status-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .analysis-status.loading .status-icon::before {
+            content: "⏳";
+        }
+
+        .analysis-status.success .status-icon::before {
+            content: "✅";
+        }
+
+        .analysis-status.error .status-icon::before {
+            content: "❌";
+        }
+
+        .status-message {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .analysis-status.loading .status-message {
+            color: #1d4ed8;
+        }
+
+        .analysis-status.success .status-message {
+            color: #047857;
+        }
+
+        .analysis-status.error .status-message {
+            color: #dc2626;
+        }
+
+        /* Report Tabs Styles */
+        .report-tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .report-tab {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .report-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .report-tab:hover:not(.active) {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .report-content {
+            display: none;
+        }
+
+        .report-content.active {
+            display: block;
+        }
+
+        /* Enhanced Dictionary Styles */
+        .word-pronunciation {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 500;
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .word-type {
+            font-size: 0.9rem;
+            color: #28a745;
+            font-weight: 600;
+            margin: 0.3rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .formality-level {
+            font-size: 0.9rem;
+            color: #ffc107;
+            font-weight: 500;
+            margin: 0.3rem 0;
+            background: #fff3cd;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .professional-example {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .professional-example .example-text {
+            font-style: italic;
+            color: #155724;
+        }
+
+        .usage-notes {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+            font-style: italic;
+            color: #495057;
+        }
+
+        .word-origin {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            color: #0d47a1;
+        }
+
+        .definition-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .definition-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Setup Instructions Styles */
+        .setup-instructions {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        .setup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .setup-header h3 {
+            color: #4a5568;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .setup-header p {
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .setup-content {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .setup-content pre {
+            background: #edf2f7;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+
+        .setup-content code {
+            background: #edf2f7;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+
+        .setup-content ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .setup-content li {
+            margin: 0.5rem 0;
+            color: #4a5568;
+        }
+
+        .setup-footer {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .setup-footer .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .setup-footer .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+        }
+
+        .setup-footer .btn-secondary {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            color: #4a5568;
+        }
+
+        .setup-footer .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Summary Section Styles */
+        .summary-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .summary-header h4 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .mood-indicator {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .mood-details {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: normal;
+            color: #4a5568;
+        }
+
+        .summary-body {
+            margin-bottom: 2rem;
+        }
+
+        .summary-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        .summary-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-section {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .detail-section h5 {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .decision-list, .next-steps-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .decision-list li, .next-steps-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+        }
+
+        .decision-list li:last-child, .next-steps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .participants-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .participant-card {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            min-width: 150px;
+        }
+
+        .participant-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .participant-role {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 0.25rem;
+        }
+
+        /* Mood Colors */
+        .mood-indicator.mood-positive {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .mood-indicator.mood-negative {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .mood-indicator.mood-neutral {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        /* Key Takeaways Styles */
+        .summary-paragraph {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-paragraph h5 {
+            color: #2d3748;
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .key-takeaways-section {
+            margin-top: 2rem;
+        }
+
+        .key-takeaways-section h5 {
+            color: #2d3748;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .takeaways-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .takeaway-category {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-top: 4px solid #667eea;
+        }
+
+        .takeaway-category h6 {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .takeaway-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .takeaway-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .takeaway-list li:last-child {
+            border-bottom: none;
+        }
+
+        .takeaway-list li strong {
+            color: #2d3748;
+        }
+
+        .takeaway-list li small {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .participants-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .participant-card {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .participant-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .participant-role {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 0.25rem;
+        }
+
+        .placeholder-content {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #718096;
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .placeholder-content h4 {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Comprehensive Report Styles */
+        .comprehensive-report {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .report-header h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+
+        .report-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .report-date {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .report-section {
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .report-section:last-child {
+            border-bottom: none;
+        }
+
+        .report-section h5 {
+            color: #2d3748;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-text {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            line-height: 1.6;
+            color: #4a5568;
+        }
+
+        .takeaways-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .takeaway-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .takeaway-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .takeaway-text {
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .tasks-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .task-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s;
+        }
+
+        .task-row:hover {
+            background: #f8fafc;
+        }
+
+        .task-row:last-child {
+            border-bottom: none;
+        }
+
+        .task-col {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            color: #4a5568;
+        }
+
+        .task-description {
+            font-weight: 500;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-badge.priority-critical {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .priority-badge.priority-high {
+            background: #fbb6ce;
+            color: #b83280;
+        }
+
+        .priority-badge.priority-medium {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .priority-badge.priority-low {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .participants-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .participant-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .participant-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .participant-role {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .participant-contributions {
+            margin-top: 1rem;
+        }
+
+        .participant-contributions strong {
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+
+        .participant-contributions ul {
+            margin: 0.5rem 0 0 1rem;
+            padding: 0;
+        }
+
+        .participant-contributions li {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .remark-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .remark-person {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .remark-text {
+            color: #4a5568;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .report-placeholder {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #718096;
+        }
+
+        @media (max-width: 768px) {
+            .task-header,
+            .task-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .task-col {
+                padding: 0.5rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .task-col:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #2d3748;
+                display: block;
+                margin-bottom: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🧠 AI Meeting Summarizer</h1>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="showSection('dashboard')">📊 Dashboard</button>
+        <button class="nav-tab" onclick="showSection('meetings')">🎤 Meeting Analysis</button>
+        <button class="nav-tab" onclick="showSection('reports')">📋 Reports</button>
+        <button class="nav-tab" onclick="showSection('search')">📚 Dictionary</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2>Dashboard Overview</h2>
+                <button class="btn btn-secondary" onclick="refreshDashboard()">🔄 Refresh</button>
+            </div>
+            
+            <!-- Metrics Grid -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>📊 Total Meetings</h3>
+                    <div class="metric-value" id="totalMeetings">Loading...</div>
+                    <div class="metric-label">This month</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>🎤 Meetings Analysed</h3>
+                    <div class="metric-value" id="meetingsAnalysed">Loading...</div>
+                    <div class="metric-label">AI processed</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>📚 Words Searched</h3>
+                    <div class="metric-value" id="wordsSearched">Loading...</div>
+                    <div class="metric-label">Dictionary lookups</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-card">
+                <h3>🕒 Recent Activity</h3>
+                <div id="recentActivity" style="margin-top: 1rem;">
+                    <div style="padding: 0.5rem 0; text-align: center; color: #666;">
+                        Loading recent activity...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meeting Analysis Section -->
+        <div id="meetings" class="content-section">
+            <h2>Meeting Analysis</h2>
+            
+            <div class="meeting-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="clientName">Client Name</label>
+                        <input type="text" id="clientName" placeholder="Enter client name" value="TechCorp Solutions">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectName">Project Name</label>
+                        <input type="text" id="projectName" placeholder="Enter project name" value="Q4 Dashboard Redesign">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="projectTheme">Project Theme</label>
+                    <input type="text" id="projectTheme" placeholder="Enter project theme or description">
+                </div>
+
+                <div class="form-group">
+                    <label for="meetingType">Meeting Type</label>
+                    <select id="meetingType">
+                        <option value="">Select meeting type</option>
+                        <option value="sales">Sales Call</option>
+                        <option value="project">Project Review</option>
+                        <option value="client">Client Meeting</option>
+                        <option value="internal">Internal Team</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Meeting Transcript</label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <p>📁 Drag & drop files here or click to upload</p>
+                        <p style="font-size: 0.9rem; color: #666;">Supports PDF, DOCX, TXT, MP3, WAV</p>
+                        <input type="file" id="fileInput" style="display: none;" multiple accept=".pdf,.docx,.txt,.mp3,.wav">
+                    </div>
+                    <div class="transcript-container">
+                        <textarea id="transcript" class="transcript-text" placeholder="Or paste your meeting transcript here...">David Lee: Not at the moment. It's mostly just final testing and code cleanup. We should be able to push it to staging by end of day tomorrow.
+
+Sarah Chen: Perfect. Maria, how about the UX/UI side?
+
+Maria Garcia: Hi everyone. So, based on the feedback from the last user testing session, I've made some adjustments to the user dashboard. The goal was to make the key metrics more prominent. I've sent the updated mockups to your inboxes this morning. I'd love to get your feedback when you have a chance.
+
+Sarah Chen: Excellent, I saw the email come through. I'll take a look right after this meeting. Ben, how are we doing with the marketing campaign?
+
+Ben Wilson: The campaign is looking good. We've got the social media posts ready to go live next week, and the email sequence is almost complete. I need to finalize the landing page copy by Friday though.
+
+Sarah Chen: Can you prioritize that? The campaign launch is critical for our Q4 goals.
+
+Ben Wilson: Absolutely, I'll make it my top priority. I should have it done by Thursday.
+
+David Lee: Great. Any blockers on the technical side that we should be aware of?
+
+Maria Garcia: Actually, yes. I need the API documentation from the backend team to finalize the integration specs. David, can you get that to me by Wednesday?
+
+David Lee: Sure thing, I'll have that ready for you.
+
+Sarah Chen: Perfect. Let's reconvene next Monday to review progress. Any other items before we wrap up?</textarea>
+                    </div>
+                </div>
+                
+                <!-- Analysis Status Display -->
+                <div id="analysisStatus" class="analysis-status" style="display: none;">
+                    <div class="status-content">
+                        <div class="status-icon"></div>
+                        <div class="status-message"></div>
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="btn btn-primary" onclick="analyzeMeeting()">🤖 Analyze Meeting</button>
+                    <button class="btn btn-secondary" onclick="clearForm()">🗑️ Clear</button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="message error" id="errorMessage" style="display: none;"></div>
+            <div class="message success" id="successMessage" style="display: none;"></div>
+            <div class="message info" id="infoMessage" style="display: none;"></div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="results-section">
+                <h3>Analysis Results</h3>
+                
+                <div class="result-card">
+                    <h4>📋 Summary</h4>
+                    <div id="summaryContent">Meeting summary will appear here...</div>
+                </div>
+
+                <div class="result-card">
+                    <h4>😊 Sentiment Analysis</h4>
+                    <div id="sentimentContent">Sentiment analysis will appear here...</div>
+                </div>
+
+                <div class="result-card">
+                    <h4>📝 Action Items</h4>
+                    <div id="actionItemsContent">Action items will appear here...</div>
+                </div>
+
+                <div class="result-card">
+                    <h4>📝 Task Assignments</h4>
+                    <div id="taskAssignmentsContent">Task assignments will appear here...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="content-section">
+            <h2>📋 Comprehensive Reports</h2>
+            
+            <!-- Report Navigation -->
+            <div class="report-tabs">
+                <button class="report-tab active" onclick="showReportSection('summary')">📝 Meeting Summary</button>
+                <button class="report-tab" onclick="showReportSection('tasks')">✅ Task Management</button>
+                <button class="report-tab" onclick="showReportSection('reports')">📊 Comprehensive Reports</button>
+            </div>
+
+            <!-- Meeting Summary Report -->
+            <div id="summaryReport" class="report-content active">
+                <h3>📝 Meeting Summary & Key Takeaways</h3>
+                <div id="summaryContent" class="summary-content">
+                    <div class="summary-placeholder">
+                        <div class="placeholder-content">
+                            <div class="placeholder-icon">📋</div>
+                            <h4>No Meeting Analysis Available</h4>
+                            <p>Use the Meeting Analysis tab to analyze a transcript and view the summary here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Management Report -->
+            <div id="tasksReport" class="report-content active">
+                <h3>Task Management Overview</h3>
+            <div class="task-board">
+                <div class="task-column">
+                    <h3>📋 Pending</h3>
+                    <div id="pendingTasks">
+                        <div style="padding: 1rem; text-align: center; color: #666;">Loading tasks...</div>
+                    </div>
+                </div>
+
+                <div class="task-column">
+                    <h3>🔄 In Progress</h3>
+                    <div id="inProgressTasks">
+                        <div style="padding: 1rem; text-align: center; color: #666;">Loading tasks...</div>
+                    </div>
+                </div>
+
+                <div class="task-column">
+                    <h3>✅ Completed</h3>
+                    <div id="completedTasks">
+                        <div style="padding: 1rem; text-align: center; color: #666;">Loading tasks...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Projects Report -->
+            <div id="projectsReport" class="report-content">
+                <h3>Project Management Overview</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h4>Active Projects</h4>
+                <button class="btn btn-primary" onclick="createProject()">➕ New Project</button>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <p>Loading projects...</p>
+                </div>
+            </div>
+        </div>
+
+            <!-- Comprehensive Reports -->
+            <div id="reportsReport" class="report-content">
+                <h3>📊 Comprehensive Meeting Report</h3>
+                <div id="comprehensiveReportContent" class="comprehensive-report-content">
+                    <div class="report-placeholder">
+                        <div class="placeholder-content">
+                            <div class="placeholder-icon">📊</div>
+                            <h4>No Comprehensive Report Available</h4>
+                            <p>Analyze a meeting transcript to generate a comprehensive report with summary, key takeaways, and task assignments.</p>
+            </div>
+            </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dictionary Section -->
+        <div id="search" class="content-section">
+            <h2>📚 Smart Dictionary</h2>
+            
+            <div class="dictionary-container">
+                <div class="dictionary-search">
+                    <span class="search-icon">📖</span>
+                    <input type="text" id="dictionaryInput" class="search-input" placeholder="Type a word to find its meaning...">
+                    <button class="btn btn-primary" onclick="searchWord()">Search</button>
+            </div>
+
+                <div class="dictionary-instructions">
+                    <p><strong>💡 How to use:</strong></p>
+                    <ul>
+                        <li>Type any word in the search box above</li>
+                        <li>Right-click on any word in the meeting transcript to look it up</li>
+                        <li>Select text and right-click for instant definition</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="dictionary-results" id="dictionaryResults">
+                <div class="dictionary-placeholder">
+                    <div class="dictionary-icon">📚</div>
+                    <h3>Ready to Help!</h3>
+                    <p>Search for any word to get its definition, pronunciation, and usage examples.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Processing your request...</p>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="lookupSelectedWord()">
+            <span>📖</span>
+            <span>Look up word</span>
+        </div>
+        <div class="context-menu-item" onclick="copySelectedText()">
+            <span>📋</span>
+            <span>Copy text</span>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load data for specific sections
+            if (sectionId === 'reports') {
+                loadReports();
+            }
+        }
+
+        // Meeting analysis functionality
+        async function analyzeMeeting() {
+            console.log('Analyze Meeting button clicked'); // Debug log
+            
+            const clientName = document.getElementById('clientName').value.trim();
+            const projectName = document.getElementById('projectName').value.trim();
+            const projectTheme = document.getElementById('projectTheme').value.trim();
+            const transcript = document.getElementById('transcript').value.trim();
+            
+            // Check if elements exist
+            console.log('Elements found:', {
+                clientName: !!document.getElementById('clientName'),
+                projectName: !!document.getElementById('projectName'),
+                projectTheme: !!document.getElementById('projectTheme'),
+                transcript: !!document.getElementById('transcript')
+            });
+            
+            console.log('Form values:', { clientName, projectName, projectTheme, transcript: transcript.substring(0, 100) + '...' }); // Debug log
+            
+            if (!clientName || !projectName || !transcript) {
+                showAnalysisStatus('error', `Please fill in all required fields: Client Name (${clientName ? '✓' : '✗'}), Project Name (${projectName ? '✓' : '✗'}), and Meeting Transcript (${transcript ? '✓' : '✗'})`);
+                return;
+            }
+            
+            hideMessages();
+            hideAnalysisStatus();
+            showLoading();
+            showAnalysisStatus('loading', 'Analyzing meeting transcript...');
+            
+            try {
+                console.log('Sending request to /api/summarize'); // Debug log
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_name: clientName,
+                        project_name: projectName,
+                        project_theme: projectTheme,
+                        transcript: transcript
+                    })
+                });
+
+                console.log('Response status:', response.status); // Debug log
+                const result = await response.json();
+                console.log('Response data:', result); // Debug log
+
+                if (response.ok) {
+                    // Store analysis data globally for potential downloads
+                    window.analysisData = result;
+                    
+                    // Track analysed meeting
+                    const currentAnalysed = parseInt(localStorage.getItem('meetingsAnalysed') || '0');
+                    localStorage.setItem('meetingsAnalysed', (currentAnalysed + 1).toString());
+                    
+                    // Update dashboard if it's visible
+                    if (document.getElementById('dashboard').classList.contains('active')) {
+                        document.getElementById('meetingsAnalysed').textContent = currentAnalysed + 1;
+                    }
+                    
+                    displayResults(result);
+                    showAnalysisStatus('success', 'Meeting analysis completed successfully! Check the Reports tab for detailed results.');
+                } else {
+                    if (response.status === 503) {
+                        showAnalysisStatus('error', 'AI service is not available. Please configure your Google Gemini API key in the .env file.');
+                    } else if (response.status === 400) {
+                        showAnalysisStatus('error', result.error || 'Please check your input and try again.');
+                    } else {
+                        showAnalysisStatus('error', result.error || 'Failed to analyze meeting. Please try again.');
+                    }
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showAnalysisStatus('error', 'Network error: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('resultsSection').classList.add('active');
+            
+            // Populate with sample data
+            document.getElementById('summaryContent').textContent = 'This is a sample meeting summary generated by AI analysis...';
+            document.getElementById('sentimentContent').textContent = 'Overall sentiment: Positive (85% confidence)';
+            document.getElementById('actionItemsContent').textContent = '• Key decision made on budget allocation\n• Client expressed satisfaction with progress\n• Prepare detailed proposal by Friday\n• Schedule follow-up meeting\n• Review contract terms';
+            document.getElementById('taskAssignmentsContent').textContent = '• Sarah: Budget proposal (High priority)\n• Mike: Contract review (Medium priority)';
+        }
+
+        function clearForm() {
+            // Clear form fields
+            document.getElementById('clientName').value = '';
+            document.getElementById('projectName').value = '';
+            document.getElementById('projectTheme').value = '';
+            document.getElementById('transcript').value = '';
+            document.getElementById('meetingType').value = '';
+            
+            // Clear uploaded files
+            clearUploadedFiles();
+            clearFileInput();
+            
+            // Hide results section
+            document.getElementById('resultsSection').classList.remove('active');
+            
+            // Hide any messages
+            hideMessages();
+            
+            showMessage('Form cleared successfully!', 'info');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function displayResults(data) {
+            console.log('Displaying results:', data); // Debug log
+            
+            // Switch to Reports tab and show comprehensive reports section
+            showSection('reports');
+            showReportSection('reports');
+            
+            // Create comprehensive summary HTML with key takeaways
+            const summaryHtml = `
+                <div class="summary-section">
+                    <div class="summary-header">
+                        <h4>📋 Executive Summary</h4>
+                        ${data.mood ? `
+                            <div class="mood-indicator ${getMoodClass(data.mood.overall || 'Neutral')}">
+                                Meeting Mood: ${data.mood.overall || 'Neutral'}
+                                ${data.mood.justification ? `<p class="mood-details">${data.mood.justification}</p>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="summary-body">
+                        <div class="summary-paragraph">
+                            <h5>📄 Summary</h5>
+                            <p class="summary-text">${data.summary || 'No summary available'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="key-takeaways-section">
+                        <h5>🎯 Key Takeaways</h5>
+                        <div class="takeaways-grid">
+                            <div class="takeaway-category">
+                                <h6>📋 Key Decisions</h6>
+                                <ul class="takeaway-list">
+                                    ${(data.key_decisions || []).map(decision => `<li>${decision}</li>`).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div class="takeaway-category">
+                                <h6>📝 Action Items</h6>
+                                <ul class="takeaway-list">
+                                    ${(data.action_items || []).map(item => `
+                                        <li>
+                                            <strong>${item.task || item}</strong>
+                                            ${item.assignee ? `<br><small>Assigned to: ${item.assignee}</small>` : ''}
+                                            ${item.deadline ? `<br><small>Due: ${item.deadline}</small>` : ''}
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div class="takeaway-category">
+                                <h6>👥 Participants</h6>
+                                <div class="participants-grid">
+                                    ${(data.participants || []).map(participant => `
+                                        <div class="participant-card">
+                                            <div class="participant-name">${participant.name}</div>
+                                            ${participant.role ? `<div class="participant-role">${participant.role}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="takeaway-category">
+                                <h6>🚀 Next Steps</h6>
+                                <ul class="takeaway-list">
+                                    ${(data.next_steps || []).map(step => `<li>${step}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Update summary content in Reports section
+            document.getElementById('summaryContent').innerHTML = summaryHtml;
+            
+            // Create comprehensive report HTML
+            const comprehensiveReportHtml = `
+                <div class="comprehensive-report">
+                    <div class="report-header">
+                        <h4>📊 Comprehensive Meeting Analysis Report</h4>
+                        <div class="report-meta">
+                            <span class="report-date">${new Date().toLocaleDateString()}</span>
+                            ${data.mood ? `
+                                <div class="mood-indicator ${getMoodClass(data.mood.overall || 'Neutral')}">
+                                    Meeting Mood: ${data.mood.overall || 'Neutral'}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h5>📄 Executive Summary</h5>
+                        <div class="summary-text">
+                            ${data.summary || 'No summary available'}
+                        </div>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h5>🎯 Key Takeaways</h5>
+                        <div class="takeaways-list">
+                            ${(data.key_decisions || []).map(decision => `
+                                <div class="takeaway-item">
+                                    <span class="takeaway-icon">📋</span>
+                                    <span class="takeaway-text">${decision}</span>
+                                </div>
+                            `).join('')}
+                            ${(data.next_steps || []).map(step => `
+                                <div class="takeaway-item">
+                                    <span class="takeaway-icon">🚀</span>
+                                    <span class="takeaway-text">${step}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h5>📝 Task Assignments & Action Items</h5>
+                        <div class="tasks-table">
+                            <div class="task-header">
+                                <div class="task-col">Task Description</div>
+                                <div class="task-col">Assigned To</div>
+                                <div class="task-col">Assigned By</div>
+                                <div class="task-col">Deadline</div>
+                                <div class="task-col">Priority</div>
+                            </div>
+                            ${(data.action_items || []).map(item => `
+                                <div class="task-row">
+                                    <div class="task-col task-description">
+                                        <strong>${item.task || item}</strong>
+                                    </div>
+                                    <div class="task-col task-assignee">
+                                        ${item.assignee || 'Not specified'}
+                                    </div>
+                                    <div class="task-col task-assigned-by">
+                                        ${item.assigned_by || 'Not specified'}
+                                    </div>
+                                    <div class="task-col task-deadline">
+                                        ${item.deadline || 'Not specified'}
+                                    </div>
+                                    <div class="task-col task-priority">
+                                        <span class="priority-badge ${getPriorityClass(item.priority || 'Medium')}">
+                                            ${item.priority || 'Medium'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${(data.tasks || []).map(task => `
+                                <div class="task-row">
+                                    <div class="task-col task-description">
+                                        <strong>${task.task || task}</strong>
+                                    </div>
+                                    <div class="task-col task-assignee">
+                                        ${task.assigned_to || 'Not specified'}
+                                    </div>
+                                    <div class="task-col task-assigned-by">
+                                        ${task.assigned_by || 'Not specified'}
+                                    </div>
+                                    <div class="task-col task-deadline">
+                                        ${task.deadline || 'Not specified'}
+                                    </div>
+                                    <div class="task-col task-priority">
+                                        <span class="priority-badge ${getPriorityClass(task.priority || 'Medium')}">
+                                            ${task.priority || 'Medium'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h5>👥 Meeting Participants</h5>
+                        <div class="participants-list">
+                            ${(data.participants || []).map(participant => `
+                                <div class="participant-item">
+                                    <div class="participant-name">${participant.name}</div>
+                                    ${participant.role ? `<div class="participant-role">${participant.role}</div>` : ''}
+                                    ${participant.key_contributions && participant.key_contributions.length > 0 ? `
+                                        <div class="participant-contributions">
+                                            <strong>Key Contributions:</strong>
+                                            <ul>
+                                                ${participant.key_contributions.map(contribution => `<li>${contribution}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    ${data.action_items && data.action_items.length > 0 ? `
+                        <div class="report-section">
+                            <h5>📝 Action Items & Quotes</h5>
+                            <div class="action-items-list">
+                                ${data.action_items.map(actionItem => `
+                                    <div class="action-item">
+                                        <div class="action-item-person">${actionItem.person}</div>
+                                        <div class="action-item-text">"${actionItem.remark}"</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Update comprehensive report content
+            document.getElementById('comprehensiveReportContent').innerHTML = comprehensiveReportHtml;
+
+            // Action Items
+            let actionItemsHtml = '';
+            if (data.action_items && data.action_items.length > 0) {
+                actionItemsHtml = data.action_items.map(actionItem => 
+                    `<div class="action-item">
+                        <strong>${actionItem.person || 'Unknown'}:</strong> 
+                        <em>"${actionItem.remark || actionItem}"</em>
+                    </div>`
+                ).join('');
+            } else {
+                actionItemsHtml = '<p>No action items identified</p>';
+            }
+            document.getElementById('actionItemsContent').innerHTML = actionItemsHtml;
+
+            // Task Assignments with enhanced display
+            let taskAssignmentsHtml = '';
+            if (data.tasks && data.tasks.length > 0) {
+                taskAssignmentsHtml = data.tasks.map(task => {
+                    const priority = task.priority || 'Normal';
+                    const priorityClass = getPriorityClass(priority);
+                    return `
+                        <div class="task-assignment">
+                            <div class="task-header">
+                                <span class="priority-badge ${priorityClass}">${priority}</span>
+                                ${task.assigned_to ? `<span class="assignee">Assigned to: ${task.assigned_to}</span>` : ''}
+                            </div>
+                            <div class="task-description">${task.task || task}</div>
+                            ${task.assigned_by ? `<div class="assigned-by">Assigned by: ${task.assigned_by}</div>` : ''}
+                            ${task.deadline ? `<div class="task-deadline">Due: ${task.deadline}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                taskAssignmentsHtml = '<p>No task assignments identified</p>';
+            }
+            document.getElementById('taskAssignmentsContent').innerHTML = taskAssignmentsHtml;
+
+            // Show results section
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function getMoodClass(mood) {
+            const moodLower = mood.toLowerCase();
+            if (moodLower.includes('positive') || moodLower.includes('good') || moodLower.includes('excellent')) {
+                return 'mood-positive';
+            } else if (moodLower.includes('negative') || moodLower.includes('bad') || moodLower.includes('poor')) {
+                return 'mood-negative';
+            } else {
+                return 'mood-neutral';
+            }
+        }
+
+        function getPriorityClass(priority) {
+            const priorityLower = priority.toLowerCase();
+            if (priorityLower.includes('high') || priorityLower.includes('critical') || priorityLower.includes('urgent')) {
+                return 'priority-high';
+            } else if (priorityLower.includes('medium') || priorityLower.includes('moderate')) {
+                return 'priority-medium';
+            } else {
+                return 'priority-low';
+            }
+        }
+
+        function showMessage(type, message) {
+            hideMessages();
+            const messageElement = document.getElementById(type + 'Message');
+            if (messageElement) {
+                messageElement.textContent = message;
+                messageElement.style.display = 'block';
+            }
+        }
+
+        function hideMessages() {
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }
+
+        function showAnalysisStatus(type, message) {
+            const statusDiv = document.getElementById('analysisStatus');
+            const iconDiv = statusDiv.querySelector('.status-icon');
+            const messageDiv = statusDiv.querySelector('.status-message');
+            
+            // Remove existing classes
+            statusDiv.className = 'analysis-status';
+            
+            // Add new class and content
+            statusDiv.classList.add(type);
+            messageDiv.textContent = message;
+            
+            // Show the status
+            statusDiv.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideAnalysisStatus();
+                }, 5000);
+            }
+        }
+
+        function hideAnalysisStatus() {
+            const statusDiv = document.getElementById('analysisStatus');
+            statusDiv.style.display = 'none';
+        }
+
+        async function createProject() {
+            const projectName = prompt('Enter project name:');
+            if (!projectName) return;
+            
+            const clientName = prompt('Enter client name:');
+            if (!clientName) return;
+            
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: projectName,
+                        client: clientName,
+                        status: 'active',
+                        description: `Project created for ${clientName}`
+                    })
+                });
+                
+                if (response.ok) {
+                    showMessage(`Project "${projectName}" created successfully!`, 'success');
+                    // Refresh dashboard data
+                    await loadDashboardData();
+                    // Refresh projects list if on reports tab
+                    if (document.getElementById('reports').classList.contains('active')) {
+                        await loadProjects();
+                    }
+                } else {
+                    const error = await response.json();
+                    showMessage(`Error creating project: ${error.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`Error creating project: ${error.message}`, 'error');
+            }
+        }
+
+        // Function to refresh dashboard data
+        async function refreshDashboard() {
+            await loadDashboardData();
+        }
+
+
+        // File upload functionality
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            // Clear previous files
+            clearUploadedFiles();
+            
+            for (let file of files) {
+                console.log('File selected:', file.name);
+                displayUploadedFile(file);
+                processFile(file);
+            }
+        }
+
+        function displayUploadedFile(file) {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'uploaded-file';
+            fileInfo.innerHTML = `
+                <div class="file-info">
+                    <span class="file-name">📄 ${file.name}</span>
+                    <span class="file-size">(${formatFileSize(file.size)})</span>
+                    <button class="remove-file" onclick="removeFile(this)">❌</button>
+                </div>
+                <div class="file-status">Processing...</div>
+            `;
+            fileUploadArea.appendChild(fileInfo);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function removeFile(button) {
+            const fileInfo = button.closest('.uploaded-file');
+            fileInfo.remove();
+            clearFileInput();
+        }
+
+        function clearUploadedFiles() {
+            const uploadedFiles = document.querySelectorAll('.uploaded-file');
+            uploadedFiles.forEach(file => file.remove());
+        }
+
+        function clearFileInput() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.value = '';
+        }
+
+        async function processFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                console.log('Uploading file:', file.name, 'Size:', file.size); // Debug log
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status); // Debug log
+                const result = await response.json();
+                console.log('Upload response:', result); // Debug log
+                
+                if (response.ok) {
+                    // Update file status
+                    const fileStatus = document.querySelector('.uploaded-file .file-status');
+                    if (fileStatus) {
+                        fileStatus.textContent = '✅ Processed successfully';
+                        fileStatus.style.color = '#28a745';
+                    }
+                    
+                    // Extract text and put it in textarea
+                    if (result.transcript) {
+                        const transcript = document.getElementById('transcript');
+                        transcript.value = result.transcript;
+                        showMessage('File processed successfully! Text extracted and added to transcript field.', 'success');
+                    } else {
+                        console.log('No transcript found in response:', result);
+                        showMessage('File processed but no text was extracted.', 'info');
+                    }
+                } else {
+                    throw new Error(result.error || 'File processing failed');
+                }
+            } catch (error) {
+                console.error('Error processing file:', error);
+                const fileStatus = document.querySelector('.uploaded-file .file-status');
+                if (fileStatus) {
+                    fileStatus.textContent = '❌ Processing failed';
+                    fileStatus.style.color = '#dc3545';
+                }
+                showMessage('Error processing file: ' + error.message, 'error');
+            }
+        }
+
+        // Dashboard Data Loading Functions
+        async function loadDashboardData() {
+            try {
+                // Load analytics data from the non-authenticated endpoint
+                const analyticsResponse = await fetch('/api/analytics');
+                const analyticsData = await analyticsResponse.json();
+                
+                if (analyticsResponse.ok) {
+                    // Update metrics with real data
+                    document.getElementById('totalMeetings').textContent = analyticsData.total_meetings || 0;
+                    document.getElementById('meetingsAnalysed').textContent = analyticsData.analysed_meetings || 0;
+                    document.getElementById('wordsSearched').textContent = analyticsData.words_searched || 0;
+                } else {
+                    // Fallback to individual API calls
+                    await loadIndividualMetrics();
+                }
+                
+                // Load recent activity
+                await loadRecentActivity();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                await loadIndividualMetrics();
+            }
+        }
+
+        async function loadIndividualMetrics() {
+            try {
+                // Load meetings
+                const meetingsResponse = await fetch('/api/meetings');
+                if (meetingsResponse.ok) {
+                    const meetingsData = await meetingsResponse.json();
+                    document.getElementById('totalMeetings').textContent = meetingsData.length || 0;
+                    // Count meetings that have been analysed (have summary)
+                    const analysedMeetings = meetingsData.filter(meeting => meeting.summary && meeting.summary.trim()).length;
+                    document.getElementById('meetingsAnalysed').textContent = analysedMeetings;
+                } else {
+                    document.getElementById('totalMeetings').textContent = '0';
+                    document.getElementById('meetingsAnalysed').textContent = '0';
+                }
+
+                // Load dictionary searches (we'll track this in localStorage for now)
+                const wordsSearched = localStorage.getItem('wordsSearched') || '0';
+                document.getElementById('wordsSearched').textContent = wordsSearched;
+
+            } catch (error) {
+                console.error('Error loading individual metrics:', error);
+                // Set fallback values
+                document.getElementById('totalMeetings').textContent = '0';
+                document.getElementById('meetingsAnalysed').textContent = '0';
+                document.getElementById('wordsSearched').textContent = '0';
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch('/api/meetings?limit=5');
+                if (response.ok) {
+                    const meetings = await response.json();
+                    const activityHtml = meetings.map(meeting => 
+                        `<div style="padding: 0.5rem 0; border-bottom: 1px solid #e1e5e9;">
+                            <strong>New meeting analyzed:</strong> ${meeting.client_name || 'Unknown'} - ${meeting.project_name || 'Unknown'}
+                            <br><small style="color: #666;">${new Date(meeting.created_at).toLocaleDateString()}</small>
+                        </div>`
+                    ).join('');
+                    
+                    document.getElementById('recentActivity').innerHTML = activityHtml || 
+                        '<div style="padding: 0.5rem 0; text-align: center; color: #666;">No recent activity</div>';
+                } else {
+                    document.getElementById('recentActivity').innerHTML = 
+                        '<div style="padding: 0.5rem 0; text-align: center; color: #666;">Unable to load recent activity</div>';
+                }
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                document.getElementById('recentActivity').innerHTML = 
+                    '<div style="padding: 0.5rem 0; text-align: center; color: #666;">Error loading recent activity</div>';
+            }
+        }
+
+        // Load Tasks Function
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/tasks');
+                if (response.ok) {
+                    const tasks = await response.json();
+                    
+                    // Group tasks by status
+                    const pendingTasks = tasks.filter(task => task.status === 'pending');
+                    const inProgressTasks = tasks.filter(task => task.status === 'in_progress');
+                    const completedTasks = tasks.filter(task => task.status === 'completed');
+                    
+                    // Render tasks
+                    renderTasks('pendingTasks', pendingTasks);
+                    renderTasks('inProgressTasks', inProgressTasks);
+                    renderTasks('completedTasks', completedTasks);
+                } else {
+                    showTaskError('Unable to load tasks');
+                }
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                showTaskError('Error loading tasks');
+            }
+        }
+
+        function renderTasks(containerId, tasks) {
+            const container = document.getElementById(containerId);
+            
+            if (tasks.length === 0) {
+                container.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">No tasks</div>';
+                return;
+            }
+            
+            const tasksHtml = tasks.map(task => `
+                <div class="task-item">
+                    <div class="task-priority priority-${task.priority?.toLowerCase() || 'normal'}">${task.priority?.toUpperCase() || 'NORMAL'}</div>
+                    <div><strong>${task.task_description || task.task || 'No description'}</strong></div>
+                    <div style="font-size: 0.9rem; color: #666;">Assigned to: ${task.assignee || 'Unassigned'}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Due: ${task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Not specified'}</div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = tasksHtml;
+        }
+
+        function showTaskError(message) {
+            document.getElementById('pendingTasks').innerHTML = `<div style="padding: 1rem; text-align: center; color: #dc3545;">${message}</div>`;
+            document.getElementById('inProgressTasks').innerHTML = `<div style="padding: 1rem; text-align: center; color: #dc3545;">${message}</div>`;
+            document.getElementById('completedTasks').innerHTML = `<div style="padding: 1rem; text-align: center; color: #dc3545;">${message}</div>`;
+        }
+
+        // Report Section Functions
+        function showReportSection(reportType) {
+            // Hide all report contents
+            document.querySelectorAll('.report-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all report tabs
+            document.querySelectorAll('.report-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected report content
+            document.getElementById(reportType + 'Report').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load data for the specific report type
+            if (reportType === 'tasks') {
+                loadTasks();
+            } else if (reportType === 'projects') {
+                loadProjects();
+            } else if (reportType === 'summary') {
+                // Summary is already loaded when meeting is analyzed
+                console.log('Summary section activated');
+            } else if (reportType === 'reports') {
+                // Comprehensive report is already loaded when meeting is analyzed
+                console.log('Comprehensive reports section activated');
+            }
+        }
+
+        async function loadReports() {
+            // Load all report data
+            await loadTasks();
+            await loadProjects();
+            await loadAnalytics();
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/analytics');
+                if (response.ok) {
+                    const analytics = await response.json();
+                    console.log('Analytics loaded:', analytics);
+                    // Analytics data is loaded, charts would be rendered here
+                } else {
+                    console.log('Analytics not available');
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Load Projects Function
+        async function loadProjects() {
+            try {
+                const response = await fetch('/api/projects');
+                if (response.ok) {
+                    const projects = await response.json();
+                    renderProjects(projects);
+                } else {
+                    showProjectError('Unable to load projects');
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showProjectError('Error loading projects');
+            }
+        }
+
+        function renderProjects(projects) {
+            const projectsContainer = document.querySelector('#projectsReport .dashboard-grid');
+            if (!projectsContainer) return;
+            
+            if (projects.length === 0) {
+                projectsContainer.innerHTML = '<div class="dashboard-card"><h3>No Projects</h3><p>No projects found.</p></div>';
+                return;
+            }
+            
+            const projectsHtml = projects.map(project => `
+                <div class="dashboard-card">
+                    <h3>🏢 ${project.client || 'Unknown Client'}</h3>
+                    <p><strong>Project:</strong> ${project.name || 'Unknown Project'}</p>
+                    <p><strong>Status:</strong> <span style="color: ${getStatusColor(project.status)}">${project.status || 'Unknown'}</span></p>
+                    <p><strong>Created:</strong> ${new Date(project.created_at).toLocaleDateString()}</p>
+                </div>
+            `).join('');
+            
+            projectsContainer.innerHTML = projectsHtml;
+        }
+
+        function getStatusColor(status) {
+            switch(status?.toLowerCase()) {
+                case 'active': return '#28a745';
+                case 'completed': return '#6c757d';
+                case 'planning': return '#ffc107';
+                default: return '#6c757d';
+            }
+        }
+
+        function showProjectError(message) {
+            const projectsContainer = document.querySelector('#projectsReport .dashboard-grid');
+            if (projectsContainer) {
+                projectsContainer.innerHTML = `<div class="dashboard-card"><h3>Error</h3><p style="color: #dc3545;">${message}</p></div>`;
+            }
+        }
+
+        // Dictionary functionality
+        let selectedText = '';
+        let contextMenu = null;
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            showMessage('Welcome to AI Meeting Summarizer! Fill in the meeting details and click "Analyze Meeting" to get started.', 'info');
+            loadDashboardData();
+            checkAPIStatus();
+            initializeDictionary();
+        });
+
+        function initializeDictionary() {
+            contextMenu = document.getElementById('contextMenu');
+            
+            // Add right-click listener to transcript textarea
+            const transcript = document.getElementById('transcript');
+            if (transcript) {
+                transcript.addEventListener('contextmenu', handleRightClick);
+                transcript.addEventListener('mouseup', handleTextSelection);
+            }
+
+            // Add Enter key listener to dictionary input
+            const dictionaryInput = document.getElementById('dictionaryInput');
+            if (dictionaryInput) {
+                dictionaryInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchWord();
+                    }
+                });
+            }
+
+            // Hide context menu when clicking elsewhere
+            document.addEventListener('click', hideContextMenu);
+        }
+
+        function handleTextSelection(e) {
+            const selection = window.getSelection();
+            if (selection.toString().trim()) {
+                selectedText = selection.toString().trim();
+                // Highlight selected text
+                highlightSelectedText();
+            }
+        }
+
+        function handleRightClick(e) {
+            e.preventDefault();
+            
+            const selection = window.getSelection();
+            if (selection.toString().trim()) {
+                selectedText = selection.toString().trim();
+                showContextMenu(e.clientX, e.clientY);
+            }
+        }
+
+        function showContextMenu(x, y) {
+            if (contextMenu) {
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = x + 'px';
+                contextMenu.style.top = y + 'px';
+            }
+        }
+
+        function hideContextMenu() {
+            if (contextMenu) {
+                contextMenu.style.display = 'none';
+            }
+        }
+
+        function lookupSelectedWord() {
+            if (selectedText) {
+                // Switch to dictionary tab
+                showSection('search');
+                // Set the word in the input
+                const dictionaryInput = document.getElementById('dictionaryInput');
+                if (dictionaryInput) {
+                    dictionaryInput.value = selectedText;
+                    searchWord();
+                }
+                hideContextMenu();
+            }
+        }
+
+        function copySelectedText() {
+            if (selectedText) {
+                navigator.clipboard.writeText(selectedText).then(() => {
+                    showMessage('Text copied to clipboard!', 'success');
+                });
+                hideContextMenu();
+            }
+        }
+
+        function highlightSelectedText() {
+            // This is a simple implementation - in a real app you'd want more sophisticated text highlighting
+            console.log('Selected text:', selectedText);
+        }
+
+        async function searchWord() {
+            const word = document.getElementById('dictionaryInput').value.trim();
+            if (!word) {
+                showMessage('Please enter a word to search', 'error');
+                return;
+            }
+
+            // Switch to dictionary tab
+            showSection('search');
+            
+            // Show loading
+            showDictionaryLoading();
+
+            // Track dictionary search
+            const currentSearches = parseInt(localStorage.getItem('wordsSearched') || '0');
+            localStorage.setItem('wordsSearched', (currentSearches + 1).toString());
+            
+            // Update dashboard if it's visible
+            if (document.getElementById('dashboard').classList.contains('active')) {
+                document.getElementById('wordsSearched').textContent = currentSearches + 1;
+            }
+
+            try {
+                const response = await fetch('/api/assistant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: word
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (result.mode === 'setup_required') {
+                        showSetupInstructions(result.answer);
+                    } else {
+                        displayDictionaryResult(word, result.answer);
+                    }
+                } else {
+                    showDictionaryError(result.error || 'Failed to get word definition');
+                }
+            } catch (error) {
+                console.error('Dictionary search error:', error);
+                showDictionaryError('Network error: ' + error.message);
+            }
+        }
+
+        function showDictionaryLoading() {
+            const resultsDiv = document.getElementById('dictionaryResults');
+            resultsDiv.innerHTML = `
+                <div class="dictionary-loading">
+                    <div class="spinner"></div>
+                    <p>Looking up "${document.getElementById('dictionaryInput').value}"...</p>
+                </div>
+            `;
+        }
+
+        function displayDictionaryResult(word, definition) {
+            const resultsDiv = document.getElementById('dictionaryResults');
+            
+            // Parse the definition to extract structured information
+            const parsedDefinition = parseDictionaryResponse(word, definition);
+            
+            resultsDiv.innerHTML = `
+                <div class="dictionary-entry">
+                    <div class="word-header">
+                        <h2 class="word-title">${parsedDefinition.word}</h2>
+                        ${parsedDefinition.pronunciation ? `<div class="word-pronunciation">🔊 ${parsedDefinition.pronunciation}</div>` : ''}
+                        ${parsedDefinition.partOfSpeech ? `<div class="word-type">📝 ${parsedDefinition.partOfSpeech}</div>` : ''}
+                        ${parsedDefinition.formalityLevel ? `<div class="formality-level">📊 ${parsedDefinition.formalityLevel}</div>` : ''}
+                    </div>
+                    
+                    <div class="definition-section">
+                        <div class="definition-title">📖 Definition</div>
+                        <div class="definition-text">${parsedDefinition.definition}</div>
+                    </div>
+                    
+                    ${parsedDefinition.professionalExamples.length > 0 ? `
+                        <div class="definition-section">
+                            <div class="definition-title">💼 Professional Usage Examples</div>
+                            <div class="examples-list">
+                                ${parsedDefinition.professionalExamples.map(example => `
+                                    <div class="example-item professional-example">
+                                        <div class="example-text">"${example}"</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${parsedDefinition.examples.length > 0 ? `
+                        <div class="definition-section">
+                            <div class="definition-title">📝 General Usage Examples</div>
+                            <div class="examples-list">
+                                ${parsedDefinition.examples.map(example => `
+                                    <div class="example-item">
+                                        <div class="example-text">"${example}"</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${parsedDefinition.synonyms.length > 0 ? `
+                        <div class="definition-section">
+                            <div class="definition-title">🔄 Synonyms</div>
+                            <div class="synonyms">
+                                ${parsedDefinition.synonyms.map(synonym => `
+                                    <span class="synonym-tag">${synonym}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${parsedDefinition.antonyms.length > 0 ? `
+                        <div class="definition-section">
+                            <div class="definition-title">⚡ Antonyms</div>
+                            <div class="antonyms">
+                                ${parsedDefinition.antonyms.map(antonym => `
+                                    <span class="antonym-tag">${antonym}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${parsedDefinition.origin ? `
+                        <div class="definition-section">
+                            <div class="definition-title">🌍 Word Origin</div>
+                            <div class="word-origin">${parsedDefinition.origin}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${parsedDefinition.usageNotes ? `
+                        <div class="definition-section">
+                            <div class="definition-title">💡 Usage Notes</div>
+                            <div class="usage-notes">${parsedDefinition.usageNotes}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function parseDictionaryResponse(word, response) {
+            // Parse the enhanced AI response to extract comprehensive dictionary information
+            const lines = response.split('\n').map(line => line.trim()).filter(line => line);
+            
+            let definition = '';
+            let pronunciation = '';
+            let partOfSpeech = '';
+            let examples = [];
+            let synonyms = [];
+            let antonyms = [];
+            let origin = '';
+            let professionalExamples = [];
+            let formalityLevel = '';
+            let usageNotes = '';
+            
+            let currentSection = '';
+            
+            for (let line of lines) {
+                const lowerLine = line.toLowerCase();
+                
+                // Enhanced section detection
+                if (lowerLine.includes('pronunciation') || lowerLine.includes('**pronunciation**')) {
+                    currentSection = 'pronunciation';
+                    if (line.includes(':')) {
+                        pronunciation = line.replace(/.*pronunciation:?\s*/i, '').replace(/\*\*/g, '');
+                    }
+                } else if (lowerLine.includes('definition') || lowerLine.includes('**definition**')) {
+                    currentSection = 'definition';
+                    if (line.includes(':')) {
+                        definition = line.replace(/.*definition:?\s*/i, '').replace(/\*\*/g, '');
+                    }
+                } else if (lowerLine.includes('grammatical') || lowerLine.includes('part of speech') || lowerLine.includes('**part of speech**')) {
+                    currentSection = 'grammar';
+                    if (line.includes(':')) {
+                        partOfSpeech = line.replace(/.*part of speech:?\s*/i, '').replace(/\*\*/g, '');
+                    }
+                } else if (lowerLine.includes('professional usage') || lowerLine.includes('**professional usage**') || lowerLine.includes('examples')) {
+                    currentSection = 'examples';
+                } else if (lowerLine.includes('synonyms') || lowerLine.includes('**synonyms**')) {
+                    currentSection = 'synonyms';
+                } else if (lowerLine.includes('antonyms') || lowerLine.includes('**antonyms**')) {
+                    currentSection = 'antonyms';
+                } else if (lowerLine.includes('origin') || lowerLine.includes('etymology') || lowerLine.includes('**origin**')) {
+                    currentSection = 'origin';
+                    if (line.includes(':')) {
+                        origin = line.replace(/.*origin:?\s*/i, '').replace(/\*\*/g, '');
+                    }
+                } else if (lowerLine.includes('formality') || lowerLine.includes('register')) {
+                    currentSection = 'formality';
+                    if (line.includes(':')) {
+                        formalityLevel = line.replace(/.*formality:?\s*/i, '').replace(/\*\*/g, '');
+                    }
+                } else if (lowerLine.includes('stylistic') || lowerLine.includes('usage notes')) {
+                    currentSection = 'usage';
+                } else if (currentSection === 'pronunciation' && line && !line.includes(':') && !line.includes('**')) {
+                    pronunciation += ' ' + line.replace(/\*\*/g, '');
+                } else if (currentSection === 'definition' && line && !line.includes(':') && !line.includes('**')) {
+                    definition += ' ' + line.replace(/\*\*/g, '');
+                } else if (currentSection === 'grammar' && line && !line.includes(':') && !line.includes('**')) {
+                    partOfSpeech += ' ' + line.replace(/\*\*/g, '');
+                } else if (currentSection === 'examples' && line && !line.includes(':') && !line.includes('**')) {
+                    const example = line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').replace(/"/g, '');
+                    if (example && example.length > 10) {
+                        examples.push(example);
+                        professionalExamples.push(example);
+                    }
+                } else if (currentSection === 'synonyms' && line && !line.includes(':') && !line.includes('**')) {
+                    const synonym = line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').replace(/\*\*/g, '');
+                    if (synonym && synonym.length > 2) {
+                        synonyms.push(synonym);
+                    }
+                } else if (currentSection === 'antonyms' && line && !line.includes(':') && !line.includes('**')) {
+                    const antonym = line.replace(/^\d+\.\s*/, '').replace(/^[-*]\s*/, '').replace(/\*\*/g, '');
+                    if (antonym && antonym.length > 2) {
+                        antonyms.push(antonym);
+                    }
+                } else if (currentSection === 'origin' && line && !line.includes(':') && !line.includes('**')) {
+                    origin += ' ' + line.replace(/\*\*/g, '');
+                } else if (currentSection === 'formality' && line && !line.includes(':') && !line.includes('**')) {
+                    formalityLevel += ' ' + line.replace(/\*\*/g, '');
+                } else if (currentSection === 'usage' && line && !line.includes(':') && !line.includes('**')) {
+                    usageNotes += ' ' + line.replace(/\*\*/g, '');
+                }
+            }
+            
+            // If no structured definition found, use the raw response
+            if (!definition) {
+                definition = response;
+            }
+            
+            return {
+                word: word,
+                definition: definition.trim(),
+                pronunciation: pronunciation.trim(),
+                partOfSpeech: partOfSpeech.trim(),
+                examples: examples.slice(0, 8), // More examples for professional use
+                synonyms: synonyms.slice(0, 10), // More synonyms
+                antonyms: antonyms.slice(0, 8), // More antonyms
+                origin: origin.trim(),
+                professionalExamples: professionalExamples.slice(0, 5),
+                formalityLevel: formalityLevel.trim(),
+                usageNotes: usageNotes.trim()
+            };
+        }
+
+        function showDictionaryError(message) {
+            const resultsDiv = document.getElementById('dictionaryResults');
+            resultsDiv.innerHTML = `
+                <div class="dictionary-error">
+                    <h3>❌ Error</h3>
+                    <p>${message}</p>
+                    <p>Please try again or check your spelling.</p>
+                </div>
+            `;
+        }
+
+        function showSetupInstructions(instructions) {
+            const resultsDiv = document.getElementById('dictionaryResults');
+            resultsDiv.innerHTML = `
+                <div class="setup-instructions">
+                    <div class="setup-header">
+                        <h3>🔧 API Setup Required</h3>
+                        <p>The dictionary needs a valid Google Gemini API key to work.</p>
+                    </div>
+                    <div class="setup-content">
+                        ${marked.parse(instructions)}
+                    </div>
+                    <div class="setup-footer">
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank" class="btn btn-primary">
+                            🔑 Get API Key
+                        </a>
+                        <button onclick="checkAPIStatus()" class="btn btn-secondary">
+                            🔄 Check Status
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Check API status
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('/api/validate-setup');
+                const result = await response.json();
+                
+                if (!result.api_key_valid) {
+                    showMessage('⚠️ AI features are disabled. Please configure your Google Gemini API key to enable meeting analysis. You can test with the demo mode below.', 'info');
+                    addDemoMode();
+                }
+            } catch (error) {
+                console.log('Could not check API status:', error);
+                addDemoMode();
+            }
+        }
+
+        function addDemoMode() {
+            // Add demo mode button
+            const analyzeButton = document.querySelector('button[onclick="analyzeMeeting()"]');
+            if (analyzeButton && !document.getElementById('demoModeBtn')) {
+                const demoButton = document.createElement('button');
+                demoButton.id = 'demoModeBtn';
+                demoButton.className = 'btn btn-warning';
+                demoButton.style.marginLeft = '10px';
+                demoButton.textContent = '🎭 Demo Mode';
+                demoButton.onclick = runDemoMode;
+                analyzeButton.parentNode.appendChild(demoButton);
+            }
+        }
+
+        function runDemoMode() {
+            console.log('Running demo mode...');
+            
+            // Get form values
+            const clientName = document.getElementById('clientName').value.trim() || 'Demo Client';
+            const projectName = document.getElementById('projectName').value.trim() || 'Demo Project';
+            const transcript = document.getElementById('transcript').value.trim();
+            
+            if (!transcript) {
+                showMessage('Please enter a meeting transcript to run demo mode.', 'error');
+                return;
+            }
+            
+            hideMessages();
+            showLoading();
+            
+            // Simulate API delay
+            setTimeout(() => {
+                const demoResult = generateDemoResult(clientName, projectName, transcript);
+                window.analysisData = demoResult;
+                
+                // Track analysed meeting in demo mode
+                const currentAnalysed = parseInt(localStorage.getItem('meetingsAnalysed') || '0');
+                localStorage.setItem('meetingsAnalysed', (currentAnalysed + 1).toString());
+                
+                // Update dashboard if it's visible
+                if (document.getElementById('dashboard').classList.contains('active')) {
+                    document.getElementById('meetingsAnalysed').textContent = currentAnalysed + 1;
+                }
+                
+                displayResults(demoResult);
+                showMessage('Demo mode completed! This is sample data. Configure your API key for real AI analysis.', 'info');
+                hideLoading();
+            }, 2000);
+        }
+
+        function generateDemoResult(clientName, projectName, transcript) {
+            // Extract names from transcript for realistic demo
+            const names = transcript.match(/([A-Z][a-z]+ [A-Z][a-z]+):/g) || [];
+            const participants = [...new Set(names.map(name => name.replace(':', '')))];
+            
+            return {
+                summary: `This is a demo analysis of the meeting between ${participants.join(', ')} for ${clientName}'s ${projectName}. The meeting covered project updates, task assignments, and key decisions. This is sample data generated in demo mode.`,
+                mood: {
+                    overall: "Positive",
+                    justification: "The meeting showed collaborative discussion with clear action items and positive outcomes."
+                },
+                action_items: [
+                    {
+                        task: "Finalize project timeline by Friday",
+                        assignee: participants[0] || "David Lee",
+                        assigned_by: participants[1] || "Sarah Chen",
+                        deadline: "Friday",
+                        priority: "High",
+                        confidence: "High"
+                    },
+                    {
+                        task: "Prepare presentation slides",
+                        assignee: participants[1] || "Sarah Chen",
+                        assigned_by: participants[1] || "Sarah Chen",
+                        deadline: "Thursday",
+                        priority: "Medium",
+                        confidence: "High"
+                    },
+                    {
+                        task: "Review budget allocation",
+                        assignee: participants[2] || "Mike Wilson",
+                        assigned_by: participants[2] || "Mike Wilson",
+                        deadline: "Not specified",
+                        priority: "Critical",
+                        confidence: "Medium"
+                    }
+                ],
+                tasks: [
+                    {
+                        task: "Complete final testing and code cleanup",
+                        assigned_to: participants[0] || "David Lee",
+                        assigned_by: participants[0] || "David Lee",
+                        deadline: "Tomorrow",
+                        priority: "High",
+                        confidence: "High"
+                    },
+                    {
+                        task: "Review updated mockups and provide feedback",
+                        assigned_to: participants[1] || "Sarah Chen",
+                        assigned_by: participants[2] || "Maria Garcia",
+                        deadline: "This week",
+                        priority: "Medium",
+                        confidence: "High"
+                    }
+                ],
+                participants: participants.map(name => ({
+                    name: name,
+                    role: "Team Member",
+                    key_contributions: ["Active participation in meeting discussion"]
+                })),
+                key_decisions: [
+                    "Project timeline finalized for Friday delivery",
+                    "Marketing campaign prioritized for Q4 goals",
+                    "API documentation needed by Wednesday"
+                ],
+                next_steps: [
+                    "Reconvene next Monday for progress review",
+                    "Finalize all deliverables by end of week",
+                    "Schedule follow-up meetings as needed"
+                ],
+                action_items: [
+                    {
+                        person: participants[0] || "David Lee",
+                        remark: "We should be able to push it to staging by end of day tomorrow."
+                    },
+                    {
+                        person: participants[1] || "Sarah Chen",
+                        remark: "The campaign launch is critical for our Q4 goals."
+                    }
+                ]
+            };
+        }
+    </script>
+</body>
+</html>
